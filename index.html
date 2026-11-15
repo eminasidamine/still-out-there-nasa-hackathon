@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Still Out There</title>
+  <meta name="description" content="Scroll from Earth to the Moon, Mars and deep space and visit the ten machines people left behind, with live data, NASA 3D models and real recordings. They stopped talking. They never left.">
+  <meta name="theme-color" content="#000000">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23000'/%3E%3Ccircle cx='16' cy='16' r='8' fill='none' stroke='%23f2efe8' stroke-width='2'/%3E%3Ccircle cx='16' cy='16' r='2.5' fill='%23ff6a33'/%3E%3C/svg%3E">
+  <link rel="preload" href="vendor/fonts/geist-sans-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="vendor/fonts/geist-sans-latin-600-normal.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="css/universe.css">
+  <link rel="stylesheet" href="css/scroll.css">
+  <script type="importmap">{ "imports": { "three": "./vendor/three/three.module.min.js", "three/addons/": "./vendor/three/addons/" } }</script>
+</head>
+<body class="scroll-mode">
+  <a class="skip" href="#card" data-i18n="app.skip">Skip to content</a>
+  <div id="boot" class="boot" aria-live="polite"><span class="boot-mark" aria-hidden="true"></span><p class="boot-text">Calling the machines…</p><span class="boot-line" aria-hidden="true"><i></i></span></div>
+  <div id="space" class="space"></div>
+  <div class="vignette" aria-hidden="true"></div>
+  <div class="dust-veil" id="veil" aria-hidden="true"></div>
+  <p class="bigtype" id="bigtype" aria-hidden="true" hidden></p>
+
+  <header class="top">
+    <a class="brand" href="#/start"><span class="brand-mark" aria-hidden="true"></span><span data-i18n="app.title">Still Out There</span></a>
+    <span></span>
+    <div class="tools">
+      <p class="signal" id="signal" hidden></p>
+      <button type="button" class="tool icon-tool" id="sound-btn" data-i18n-label="scroll.sound" aria-label="Sound" aria-pressed="false"><span class="eq" aria-hidden="true"><i></i><i></i><i></i></span></button>
+      <span class="langs" role="group" aria-label="Language"></span>
+      <a class="tool tool-classic" href="classic.html" data-i18n="scroll.classic">Classic view</a>
+    </div>
+  </header>
+
+  <nav class="rail" id="rail" data-i18n-label="scroll.journey" aria-label="Journey"></nav>
+  <main id="card" class="card-host" tabindex="-1">
+    <noscript><p class="loading">This site needs JavaScript to work out what time it is on Mars.</p></noscript>
+  </main>
+  <div id="flight" class="flight" aria-hidden="true"></div>
+  <p id="caption" class="caption" aria-live="polite" hidden></p>
+  <p id="pick-hint" class="pick-hint" aria-hidden="true" hidden></p>
+  <div id="layer" hidden></div>
+
+  <!-- the tall track that the scroll runs through; sections are sized by js/scroll/scroll.js -->
+  <div id="track" class="track" aria-hidden="true"></div>
+
+  <script src="vendor/astronomy.browser.min.js"></script>
+  <script src="vendor/gsap/gsap.min.js"></script>
+  <script type="module" src="js/scroll/scroll.js"></script>
+</body>
+</html>

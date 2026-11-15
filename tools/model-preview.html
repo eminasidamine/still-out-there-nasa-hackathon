@@ -1,0 +1,30 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Model preview (dev tool)</title>
+<style>body{margin:0;background:#111;display:grid;grid-template-columns:repeat(3,1fr);gap:4px}canvas{width:100%;aspect-ratio:1;display:block;background:#1a1a1a}p{color:#ccc;font:12px monospace;margin:4px}</style>
+<script type="importmap">{"imports":{"three":"../vendor/three/three.module.min.js","three/addons/":"../vendor/three/addons/"}}</script>
+<script type="module">
+import * as THREE from 'three';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+const ids = (new URLSearchParams(location.search).get('m') || 'eagle,opportunity,ingenuity,kepler,pioneer10').split(',');
+for (const id of ids) {
+  const wrap = document.createElement('div'); const c = document.createElement('canvas'); const p = document.createElement('p');
+  wrap.append(c, p); document.body.append(wrap);
+  const r = new THREE.WebGLRenderer({ canvas: c, antialias: true }); r.setSize(460, 460, false);
+  r.toneMapping = THREE.ACESFilmicToneMapping; r.outputColorSpace = THREE.SRGBColorSpace;
+  const scene = new THREE.Scene(); scene.environment = new THREE.PMREMGenerator(r).fromScene(new RoomEnvironment(), 0.04).texture;
+  const sun = new THREE.DirectionalLight(0xffffff, 2.5); sun.position.set(3, 4, 2); scene.add(sun);
+  const cam = new THREE.PerspectiveCamera(35, 1, 0.01, 1000);
+  const loader = new GLTFLoader().setDRACOLoader(new DRACOLoader().setDecoderPath('../vendor/three/addons/libs/draco/gltf/'));
+  loader.load(`../assets/models/${id}.glb`, (g) => {
+    const box = new THREE.Box3().setFromObject(g.scene), size = box.getSize(new THREE.Vector3()), ctr = box.getCenter(new THREE.Vector3());
+    g.scene.position.sub(ctr); scene.add(g.scene);
+    const d = Math.max(size.x, size.y, size.z) * 1.9; cam.position.set(d * .8, d * .45, d); cam.lookAt(0, 0, 0);
+    let tris = 0; g.scene.traverse((o) => { if (o.isMesh) tris += (o.geometry.index ? o.geometry.index.count : o.geometry.attributes.position.count) / 3; });
+    p.textContent = `${id} · size ${size.toArray().map((v) => v.toFixed(2)).join(' × ')} · ${Math.round(tris)} tris`;
+    r.render(scene, cam); document.title = 'done';
+  }, undefined, (e) => { p.textContent = id + ' ERROR ' + e.message; });
+}
+</script>
