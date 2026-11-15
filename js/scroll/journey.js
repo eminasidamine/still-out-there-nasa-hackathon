@@ -1,5 +1,5 @@
-// Start screen: the Earth, the Moon and Mars, turning, with rockets that keep leaving the Earth for the Moon and
-// for Mars, and satellites going round all three. It sits on top of the big 3D scene and fades away as the page scrolls toward the Moon.
+// Start screen: the Earth, the Moon and Mars, turning, with probes that keep leaving the Earth for the
+// Moon and for Mars. It sits on top of the big 3D scene and fades away as the page scrolls toward the Moon.
 // Sizes and distances are not to scale: the picture is about the journey.
 import * as THREE from 'three';
 import { h } from '../v1/dom.js';
@@ -148,104 +148,28 @@ export function createJourney(under, { onWorld } = {}) {
   let moonRoute = route(moonAt(moonAngle, new THREE.Vector3()), 2.2);
   const moonLine = routeLine(0xcfd8ff, 0.45);
 
-  // ---- rockets: they lift off from the Earth and fly the route, nose first, with a flickering flame ----
-  const metal = (color, extra = {}) => new THREE.MeshStandardMaterial({ color, roughness: 0.45, metalness: 0.35, ...extra });
-  function makeRocket(scale, stripe) {
-    const g = new THREE.Group();
-    const body = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.08, 0.42, 16), metal(0xf2f2f2));
-    const band = new THREE.Mesh(new THREE.CylinderGeometry(0.0805, 0.0805, 0.06, 16), metal(stripe));
-    band.position.y = 0.08;
-    const nose = new THREE.Mesh(new THREE.ConeGeometry(0.07, 0.18, 16), metal(stripe));
-    nose.position.y = 0.3;
-    const win = new THREE.Mesh(new THREE.SphereGeometry(0.028, 12, 8), metal(0x6fc3ff, { emissive: 0x1a5a8a, emissiveIntensity: 0.6 }));
-    win.position.set(0, 0.14, 0.066);
-    g.add(body, band, nose, win);
-    for (let i = 0; i < 3; i++) {                                   // three fins
-      const fin = new THREE.Mesh(new THREE.BoxGeometry(0.012, 0.12, 0.09), metal(stripe));
-      const a = (i / 3) * Math.PI * 2;
-      fin.position.set(Math.sin(a) * 0.09, -0.16, Math.cos(a) * 0.09);
-      fin.rotation.y = a;
-      g.add(fin);
+  // probes: a bright head and a fading tail that run along a route, again and again
+  const probeTex = glowTexture('rgba(255,255,255,1)', 'rgba(140,200,255,.5)');
+  function probe(color, size, period, offset) {
+    const parts = [];
+    for (let i = 0; i < 9; i++) {
+      const s = glowSprite(probeTex, size * (1 - i * 0.09), 1 - i * 0.11);
+      s.material.color = new THREE.Color(color);
+      scene.add(s);
+      parts.push(s);
     }
-    const flame = glowSprite(glowTexture('rgba(255,255,230,1)', 'rgba(255,150,60,.75)'), 0.32, 1);
-    flame.position.y = -0.3;
-    g.add(flame);
-    g.scale.setScalar(scale);
-    scene.add(g);
-    // the exhaust trail: soft dots that fade behind it
-    const trail = [];
-    for (let i = 0; i < 10; i++) { const s = glowSprite(trailTex, scale * (0.34 - i * 0.022), 0.6 - i * 0.055); scene.add(s); trail.push(s); }
-    return { g, flame, trail };
+    return { parts, period, offset };
   }
-  const trailTex = glowTexture('rgba(255,235,210,.9)', 'rgba(255,160,90,.35)');
-  function rocket(scale, stripe, period, offset) { return { ...makeRocket(scale, stripe), period, offset }; }
-  const marsRockets = [rocket(2.4, 0xd8452b, 10, 0), rocket(2.1, 0x2b6fd8, 10, 0.5)];
-  const moonRockets = [rocket(1.9, 0xd8452b, 6, 0.25)];
-  const tangent = new THREE.Vector3(), Y = new THREE.Vector3(0, 1, 0);
-  function runRockets(list, curve, time, now) {
-    for (const r of list) {
-      const k = ((time / r.period + r.offset) % 1 + 1) % 1;
-      const fade = Math.min(1, k * 10, (1 - k) * 10);                // grows at lift-off, shrinks on arrival
-      r.g.position.copy(curve.getPoint(k));
-      curve.getTangent(Math.min(0.999, k), tangent);
-      r.g.quaternion.setFromUnitVectors(Y, tangent.normalize());    // nose along the way
-      r.g.scale.setScalar(r.scale0 ??= r.g.scale.x);
-      r.g.scale.multiplyScalar(Math.max(0.001, fade));
-      r.flame.scale.setScalar(0.28 + Math.sin(now / 45 + r.offset * 9) * 0.06);
-      r.trail.forEach((s, i) => {
-        s.position.copy(curve.getPoint(Math.max(0, k - (i + 1) * 0.014)));
-        s.material.opacity = (0.6 - i * 0.055) * fade;
+  const marsProbes = [probe(0xffc4a0, 0.9, 9, 0), probe(0xffc4a0, 0.7, 9, 0.5)];
+  const moonProbes = [probe(0xd6e4ff, 0.7, 4.5, 0.2)];
+  function runProbes(list, curve, time) {
+    for (const p of list) {
+      const k = ((time / p.period + p.offset) % 1 + 1) % 1;
+      const fade = Math.min(1, k * 8, (1 - k) * 8);               // appear at launch, vanish on arrival
+      p.parts.forEach((s, i) => {
+        s.position.copy(curve.getPoint(Math.max(0, k - i * 0.012)));
+        s.material.opacity = (1 - i * 0.11) * fade;
       });
-    }
-  }
-
-  // ---- satellites: small spacecraft with solar wings, going round the Earth, the Moon and Mars ----
-  function makeSatellite(scale, gold = true) {
-    const g = new THREE.Group();
-    const bus = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.16, 0.22), metal(gold ? 0xd4a63a : 0xcfd3da, { metalness: 0.7, roughness: 0.3 }));
-    g.add(bus);
-    const panelMat = new THREE.MeshStandardMaterial({ map: panelTex, color: 0xffffff, roughness: 0.35, metalness: 0.4, side: THREE.DoubleSide });
-    for (const sgn of [-1, 1]) {
-      const arm = new THREE.Mesh(new THREE.CylinderGeometry(0.008, 0.008, 0.12, 6), metal(0x9aa0a8));
-      arm.rotation.z = Math.PI / 2; arm.position.x = sgn * 0.14;
-      const wing = new THREE.Mesh(new THREE.PlaneGeometry(0.42, 0.16), panelMat);
-      wing.position.x = sgn * 0.41;
-      g.add(arm, wing);
-    }
-    const dish = new THREE.Mesh(new THREE.SphereGeometry(0.07, 16, 8, 0, Math.PI * 2, 0, Math.PI / 2.4), metal(0xeeeeee, { side: THREE.DoubleSide }));
-    dish.rotation.x = Math.PI; dish.position.z = 0.14; dish.rotation.x = -Math.PI / 2;
-    g.add(dish);
-    const blink = glowSprite(glowTexture('rgba(255,90,70,1)', 'rgba(255,60,40,.4)'), 0.12, 1);
-    blink.position.set(0, 0.1, 0);
-    g.add(blink);
-    g.scale.setScalar(scale);
-    scene.add(g);
-    return { g, blink };
-  }
-  const panelTex = (() => {                                       // blue solar cells in a grid
-    const c = document.createElement('canvas'); c.width = 128; c.height = 48;
-    const g = c.getContext('2d');
-    g.fillStyle = '#0d2a5c'; g.fillRect(0, 0, 128, 48);
-    for (let x = 0; x < 128; x += 16) for (let y = 0; y < 48; y += 16) { g.fillStyle = (x + y) % 32 ? '#1d4fa3' : '#1a4592'; g.fillRect(x + 1, y + 1, 14, 14); }
-    const tx = new THREE.CanvasTexture(c); tx.colorSpace = THREE.SRGBColorSpace; return tx;
-  })();
-  // { around, radius, tilt (radians), period (s), phase }
-  const sats = [
-    { around: () => earth.position, radius: EARTH_R * 1.35, incl: 52 * RAD, node: 0.4, period: 24, phase: 0, s: makeSatellite(1.7) },
-    { around: () => earth.position, radius: EARTH_R * 1.55, incl: 98 * RAD, node: 2.1, period: 32, phase: 2, s: makeSatellite(1.5, false) },
-    { around: () => earth.position, radius: EARTH_R * 1.9, incl: 8 * RAD, node: 4.0, period: 46, phase: 4, s: makeSatellite(1.8) },
-    { around: () => moon.position, radius: MOON_R * 2.1, incl: 85 * RAD, node: 1.0, period: 14, phase: 1, s: makeSatellite(0.9) },
-    { around: () => mars.position, radius: MARS_R * 1.9, incl: 25 * RAD, node: 0.7, period: 18, phase: 3, s: makeSatellite(1.2, false) },
-  ];
-  const sp = new THREE.Vector3(), ahead = new THREE.Vector3();
-  const orbitPoint = (o, a, out) => out.set(Math.cos(a) * o.radius, 0, -Math.sin(a) * o.radius).applyAxisAngle(tilt, o.incl).applyAxisAngle(Y, o.node).add(o.around());
-  function runSatellites(time, now) {
-    for (const o of sats) {
-      const a = o.phase + (time / o.period) * Math.PI * 2;
-      orbitPoint(o, a, sp); orbitPoint(o, a + 0.05, ahead);
-      o.s.g.position.copy(sp);
-      o.s.g.lookAt(ahead);                                         // fly forward, wings out to the sides
-      o.s.blink.material.opacity = (now / 1000 + o.phase) % 1.4 < 0.12 ? 1 : 0.15;
     }
   }
 
@@ -320,11 +244,10 @@ export function createJourney(under, { onWorld } = {}) {
       marsLine.material.opacity = 0.38 + Math.sin(now / 900) * 0.12;
       moonLine.material.opacity = 0.34 + Math.sin(now / 700 + 1) * 0.1;
       earthGlow.material.opacity = 0.72 + Math.sin(now / 1600) * 0.1;
-      runRockets(marsRockets, marsRoute, clock, now);
-      runRockets(moonRockets, moonRoute, clock, now);
+      runProbes(marsProbes, marsRoute, clock);
+      runProbes(moonProbes, moonRoute, clock);
     }
-    runSatellites(still ? 0 : clock, now);
-    if (still) for (const r of [...marsRockets, ...moonRockets]) { r.g.visible = false; r.trail.forEach((x) => { x.visible = false; }); }
+    for (const p of [...marsProbes, ...moonProbes]) p.parts.forEach((x) => { x.visible = !still; });
     const tg = target();
     const sway = still ? 0 : Math.sin(clock * 0.12) * 0.22;           // a slow look around
     const home = tg.clone().add(OFFSET.clone().applyAxisAngle(UP, sway).setLength(dist()));
