@@ -129,12 +129,6 @@ body.over-machine { cursor: pointer; }
   background: rgba(0, 0, 0, .7); border: 1px solid var(--line); font-size: .75rem; color: var(--ink); white-space: nowrap; }
 
 /* Start screen: the Earth, the Moon and Mars (js/scroll/journey.js), over the big scene, under the cards */
-.journey { position: fixed; inset: 0; pointer-events: none; transition: opacity .2s linear; }
-.journey-canvas { position: absolute; inset: 0; width: 100% !important; height: 100% !important; display: block; }
-.journey-labels { position: absolute; inset: 0; overflow: hidden; }
-.journey-label { position: absolute; left: 0; top: 0; white-space: nowrap; font: 500 .72rem/1 var(--mono, ui-monospace, monospace); letter-spacing: .14em; text-transform: uppercase; color: rgba(242, 239, 232, .7); text-shadow: 0 0 8px #000; }
-.journey-label.is-link { pointer-events: auto; cursor: pointer; background: none; border: 1px solid rgba(242, 239, 232, .28); border-radius: 999px; padding: .5em .9em; color: #f2efe8; font-weight: 600; }
-.journey-label.is-link:hover, .journey-label.is-link:focus-visible { border-color: #ff6a33; color: #fff; }
 
 /* ---------- the menu bar, as on the classic map: a dark strip, wide-spaced capitals, a green line under where you are ---------- */
 .top { grid-template-columns: auto 1fr auto; gap: 0 28px; padding: env(safe-area-inset-top, 0px) var(--pad) 0; min-height: 64px;
@@ -160,12 +154,6 @@ body.over-machine { cursor: pointer; }
   .rail { top: calc(env(safe-area-inset-top, 0px) + 112px); }
 }
 
-/* labels on the start scene: name, then distance and trip time */
-.journey-label { display: grid; gap: 3px; text-align: start; }
-.journey-name { font-size: .8125rem; }
-.journey-sub { font-family: var(--sans); text-transform: none; letter-spacing: 0; font-size: .75rem; font-weight: 400; color: rgba(242, 239, 232, .72); }
-.journey-label.is-link { border-radius: 14px; padding: .55em .9em; background: rgba(0, 0, 0, .45); }
-@media (max-width: 760px) { .journey-label.is-link { padding: .4em .75em; } }
 
 /* the scroll cue lives in the menu bar on the first screen */
 .top-cue { min-height: 38px; padding: 0 12px 0 4px; border: 0; background: none; font: inherit; font-size: .8125rem; cursor: pointer; transition: opacity .4s, visibility .4s; }
@@ -224,4 +212,58 @@ body.is-turning .turn-hint { opacity: 0; }
 /* the first screen keeps only the scene, the menu and its two buttons: no stop list on the side */
 body.at-start .rail { opacity: 0; pointer-events: none; }
 .rail { transition: opacity .4s; }
-@media (max-width: 760px) { .journey-sub { display: none; } }
+
+/* ---------- start screen with photos (js/scroll/journey.js) ---------- */
+.journey { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; transition: opacity .2s linear;
+  background:
+    radial-gradient(1px 1px at 8% 22%, #fff 50%, transparent 51%), radial-gradient(1px 1px at 23% 78%, #fff 50%, transparent 51%),
+    radial-gradient(1.5px 1.5px at 44% 14%, #fff 50%, transparent 51%), radial-gradient(1px 1px at 57% 64%, #fff 50%, transparent 51%),
+    radial-gradient(1px 1px at 66% 31%, #fff 50%, transparent 51%), radial-gradient(1.5px 1.5px at 81% 72%, #fff 50%, transparent 51%),
+    radial-gradient(1px 1px at 93% 18%, #fff 50%, transparent 51%), radial-gradient(1px 1px at 35% 46%, #fff 50%, transparent 51%),
+    radial-gradient(1px 1px at 12% 92%, #fff 50%, transparent 51%), radial-gradient(1px 1px at 72% 88%, #fff 50%, transparent 51%),
+    radial-gradient(1px 1px at 50% 30%, #fff 50%, transparent 51%), radial-gradient(1px 1px at 88% 45%, #fff 50%, transparent 51%),
+    #000; }
+.journey-routes { position: absolute; inset: 0; width: 100%; height: 100%; }
+.route { fill: none; stroke-width: 1.2; stroke-dasharray: 6 7; animation: route-flow 1.6s linear infinite; }
+.route-mars { stroke: rgba(255, 154, 112, .6); }
+.route-moon { stroke: rgba(207, 216, 255, .55); }
+.route-light { fill: #fff; filter: drop-shadow(0 0 6px #bfe0ff) drop-shadow(0 0 12px rgba(140, 200, 255, .8)); }
+@keyframes route-flow { to { stroke-dashoffset: -26; } }
+
+.world { position: absolute; padding: 0; margin: 0; border: 0; background: none; border-radius: 50%; pointer-events: auto; cursor: default; }
+button.world { cursor: pointer; }
+.world-pic { display: block; width: 100%; height: 100%; border-radius: 50%; animation: world-float 9s ease-in-out infinite alternate; }
+.world-pic img { display: block; width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
+.world-earth { left: 9vw; top: 30vh; width: 36vh; }
+.world-earth .world-pic { box-shadow: 0 0 60px rgba(90, 160, 255, .35); }
+.world-moon { left: 37vw; top: 58vh; width: 12vh; }
+.world-moon .world-pic { box-shadow: 0 0 34px rgba(230, 230, 225, .22); animation-duration: 7s; animation-delay: -2s; }
+.world-mars { right: 18vw; top: 17vh; width: 20vh; }
+.world-mars .world-pic { box-shadow: 0 0 46px rgba(255, 110, 60, .35); animation-duration: 11s; animation-delay: -5s; }
+button.world:hover .world-pic { box-shadow: 0 0 0 2px rgba(255, 255, 255, .5), 0 0 60px rgba(255, 255, 255, .25); }
+@keyframes world-float { from { transform: translateY(-6px) rotate(-1.5deg); } to { transform: translateY(6px) rotate(1.5deg); } }
+
+.journey-label { position: absolute; left: 0; top: 0; display: grid; gap: 3px; pointer-events: none; white-space: nowrap; text-align: start;
+  font: 600 .8125rem/1.2 var(--sans); letter-spacing: .14em; text-transform: uppercase; color: #f2efe8; text-shadow: 0 0 8px #000; background: none; border: 0; padding: 0; }
+.journey-label .journey-sub { font-weight: 400; letter-spacing: 0; text-transform: none; font-size: .75rem; color: rgba(242, 239, 232, .7); }
+.journey-label.is-link { pointer-events: auto; cursor: pointer; }
+.journey-label.is-link:hover .journey-name { color: #fff; text-decoration: underline; text-underline-offset: 4px; }
+
+/* the two buttons, centred at the bottom: the signal (orange outline) above, Start the journey (white) below */
+.card-host:has(.card-start) { bottom: calc(env(safe-area-inset-bottom, 0px) + 34px); }
+.start-actions { flex-direction: column; flex-wrap: nowrap; gap: 10px; }
+.start-actions > * { min-width: 300px; justify-content: center; }
+.start-actions .hold { background: transparent; border: 1px solid rgba(255, 140, 90, .75); }
+.btn-go { background: #f2efe8; color: #0b1220; box-shadow: 0 8px 30px rgba(255, 255, 255, .16); }
+.btn-go:hover { background: #fff; }
+
+@media (max-width: 760px) {
+  .world-earth { left: 6vw; top: 26vh; width: 44vw; }
+  .world-moon { left: 60vw; top: 44vh; width: 16vw; }
+  .world-mars { right: 8vw; top: 15vh; width: 24vw; }
+  .journey-label { text-align: center; font-size: .6875rem; }
+  .journey-label .journey-sub { display: none; }
+  .start-actions > * { min-width: 0; }
+}
+@media (prefers-reduced-motion: reduce) { .world-pic, .route { animation: none; } }
+.journey-label.is-under { text-align: center; justify-items: center; }
