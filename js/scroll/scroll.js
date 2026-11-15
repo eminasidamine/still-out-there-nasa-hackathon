@@ -394,7 +394,9 @@ function paint(y) {
   } else { U.streaks(0, 0); U.pulse(null); }
   U.frame(seg.frame ?? (seg.card === 'finale' ? 'right' : seg.card === 'start' ? 'none' : 'left'));
   // the Earth–Moon–Mars start screen fades out as the page starts toward the Moon
-  J?.set(i === 0 ? 1 - band(u, 0.55, 0.95) : 0);
+  const jo = i === 0 ? 1 - band(u, 0.55, 0.95) : 0;
+  J?.set(jo);
+  U.cover(jo >= 0.999);                 // the start screen hides the big scene completely: don't draw both
   paintMenu(i);
   $('top-cue')?.classList.toggle('is-gone', i > 0 || u > 0.7);
 
@@ -439,6 +441,8 @@ function paint(y) {
 /** Entering a section: labels, the lamp on the machine, the address, the next models. */
 function enterSeg(seg, i) {
   shownSeg = seg.id;
+  // the sharp map of the world you are heading to
+  for (const w of [seg.world].flat()) if (w === 'moon' || w === 'mars') U.sharpen(w);
   U.setLabels(seg.kind === 'hold' ? view(seg.card)?.labels || [] : []);
   U.focusMachine(seg.site ?? null);
   if (seg.kind === 'hold' && location.hash !== `#/${seg.id}` && !layerOpen()) history.replaceState(null, '', `#/${seg.id}`);
@@ -685,11 +689,8 @@ async function start() {
   requestAnimationFrame(loop);
 
   U.prewarm();
-  // the 3D models are big: fetch them once the first screen is up, not before
-  setTimeout(() => {
-    for (const id of ['eagle', 'opportunity', 'ingenuity', 'kepler', 'pioneer10']) { asked.add(id); U.ready(id).then(() => U.prewarm()); }
-    U.loaded(['mars']).then(() => U.prewarm());
-  }, 3000);
+  // the 3D models are big: each one is fetched a few stops before you reach it (see enterSeg), never all at once
+  U.loaded(['mars']).then(() => U.prewarm());
   turning();
   U.pause(false); U.warm();
   document.body.classList.add('is-ready');

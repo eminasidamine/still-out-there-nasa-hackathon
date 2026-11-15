@@ -56,7 +56,7 @@ function earthSubsolar(d) {
 export function createUniverse(host, { onPick } = {}) {
   const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
   // Sharp when still, lighter while moving: full ratio (max 1.5) at rest, 1 during flights and drags.
-  const REST_DPR = Math.min(devicePixelRatio || 1, 1.5);
+  const REST_DPR = Math.min(devicePixelRatio || 1, 1.25);
   let dpr = REST_DPR, settleTimer = 0;
   renderer.setPixelRatio(dpr);
   function setDpr(v) { if (v === dpr) return; dpr = v; renderer.setPixelRatio(v); renderer.setSize(w, h, false); }
@@ -68,7 +68,7 @@ export function createUniverse(host, { onPick } = {}) {
   renderer.toneMappingExposure = 1.1;
   // sun shadows, only around the machine you are visiting (see focusMachine)
   renderer.shadowMap.enabled = true;
-  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  renderer.shadowMap.type = THREE.PCFShadowMap;
   const canvas = renderer.domElement;
   canvas.className = 'universe';
   canvas.setAttribute('aria-hidden', 'true');
@@ -112,15 +112,15 @@ export function createUniverse(host, { onPick } = {}) {
     if (bitmaps) bitmaps.load(src, (img) => cb(img, false), undefined, fail);
     else tex.load(src, (img) => cb(img.image ?? img, true), undefined, fail);
   };
-  const sharpQueue = [];
-  let sharpTimer = 0;
-  const sharpen = () => {                                   // one 4K map at a time, after the page has settled
-    clearTimeout(sharpTimer);
-    sharpTimer = setTimeout(function next() {
-      const job = sharpQueue.shift();
-      if (!job) return;
-      read(job.src, (img, flip) => { job.t.image = img; job.t.flipY = flip; job.t.needsUpdate = true; dirty = true; sharpTimer = setTimeout(next, 300); }, () => { sharpTimer = setTimeout(next, 300); });
-    }, 2500);
+  // 4K copies are fetched only for the world you are about to visit (sharpen('moon') / sharpen('mars')), one at a
+  // time, and never on slow devices: each 4K upload costs the graphics chip a noticeable pause.
+  const sharpJobs = new Map();             // map name → { src, t }
+  let lowQuality = false;
+  const loadSharp = (name) => {
+    const job = sharpJobs.get(name);
+    if (!job || lowQuality) return;
+    sharpJobs.delete(name);
+    read(job.src, (img, flip) => { job.t.image = img; job.t.flipY = flip; job.t.needsUpdate = true; dirty = true; });
   };
   const load = (url, srgb = true) => {
     const lo = url.replace('assets/maps/', 'assets/maps/2k/');
@@ -129,7 +129,8 @@ export function createUniverse(host, { onPick } = {}) {
     if (srgb) t.colorSpace = THREE.SRGBColorSpace;
     t.anisotropy = 4;
     read(lo, (img, flip) => { t.image = img; t.flipY = flip; t.needsUpdate = true; dirty = true; ok(); }, () => ok());
-    if (!small) { sharpQueue.push({ src: url, t }); sharpen(); }
+    const name = url.split('/').pop().replace('.jpg', '');
+    if (!small && (name === 'moon' || name === 'mars')) sharpJobs.set(name, { src: url, t });
     return t;
   };
 
@@ -137,7 +138,7 @@ export function createUniverse(host, { onPick } = {}) {
   const sun = new THREE.DirectionalLight(0xfff3e2, 2.8);
   sun.position.copy(SUN_DIR).multiplyScalar(50);
   sun.castShadow = true;                       // always on, so shaders never rebuild; the map only updates at a machine
-  sun.shadow.mapSize.set(2048, 2048);
+  sun.shadow.mapSize.set(1024, 1024);
   sun.shadow.autoUpdate = false;
   const sunTarget = new THREE.Object3D(); scene.add(sunTarget); sun.target = sunTarget;
   const hemi = new THREE.HemisphereLight(0x8d9bb8, 0x16110c, 0.08);
@@ -554,10 +555,10 @@ export function createUniverse(host, { onPick } = {}) {
   let focused = null, lastAmbient = 0;
   canvas.addEventListener('pointerdown', () => { canvas.dataset.drag = '1'; });
   addEventListener('pointerup', () => { delete canvas.dataset.drag; });
-  let paused = false;
+  let paused = false, covered = false;
   function frame(t) {
     requestAnimationFrame(frame);
-    if (document.hidden || paused) return;
+    if (document.hidden || paused || covered) return;
     const userMoving = false;
     if (userMoving && canvas.dataset.drag) moving();
     let ambient = false;
@@ -607,6 +608,8 @@ export function createUniverse(host, { onPick } = {}) {
     warm() { (window.requestIdleCallback || ((f) => setTimeout(f, 1200)))(() => env(), { timeout: 4000 }); },
     /** Stop drawing while something covers the whole view (the loading screen). */
     pause(on) { paused = on; dirty = true; },
+    /** Something opaque covers the whole scene (the start screen): skip drawing it, it would be wasted work. */
+    cover(on) { if (covered === on) return; covered = on; dirty = true; },
     addMachine,
     fly,
     focusMachine,
@@ -698,7 +701,9 @@ export function createUniverse(host, { onPick } = {}) {
       dirty = true;
     },
     /** Sharpness (device pixel ratio); lowered once by the page on slow devices. */
-    quality(v) { setDpr(Math.min(REST_DPR, v)); dirty = true; },
+    quality(v) { setDpr(Math.min(REST_DPR, v)); lowQuality = true; sharpJobs.clear(); dirty = true; },
+    /** Fetch the sharp (4K) map of the Moon or Mars, when you head there. */
+    sharpen(id) { loadSharp(id); },
     /** Air between you and space: 0 = black sky (space, the Moon), 1 = full Martian daytime sky. */
     air(v, dark = 0) {
       dome.visible = v > 0.002; dome.material.opacity = 0.92 * v;
