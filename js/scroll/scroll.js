@@ -14,7 +14,7 @@ import { rollCall } from '../rollcall.js';
 import { lightTimes, clock, kmOf } from '../reach.js';
 import { daysSince } from '../live.js';
 import { soundOn, setSound, mix, captions } from './sound.js';
-import { layerOpen, closeLayer, showStory, showPhoto, showSources, holdButton, paintSignal, paintPayoff } from './layers.js';
+import { layerOpen, closeLayer, showStory, showPhoto, showSources, paintSignal, paintPayoff } from './layers.js';
 
 const $ = (id) => document.getElementById(id);
 const gsap = globalThis.gsap;
@@ -166,36 +166,10 @@ function buildPoses() {
 }
 
 // ---- cards ----------------------------------------------------------------------------------
-/** "Did you know?": short, true facts in simple words, one at a time (a new one every few seconds or on a tap). */
-const FACTS = 9;
-function factBox() {
-  let n = Math.floor(Math.random() * FACTS), timer = 0;
-  const text = h('p', { class: 'fact-text', 'aria-live': 'polite' });
-  const show = () => {
-    text.classList.remove('is-in'); void text.offsetWidth;
-    text.textContent = t(`fact.${n + 1}`);
-    text.classList.add('is-in');
-  };
-  const next = () => { n = (n + 1) % FACTS; show(); restart(); };
-  const restart = () => { clearInterval(timer); if (!reduced()) timer = setInterval(() => { if (!document.hidden) next(); }, 9000); };
-  show(); restart();
-  return h('div', { class: 'fact' },
-    h('p', { class: 'fact-title' }, h('span', { class: 'fact-icon', 'aria-hidden': 'true' }, '?'), t('fact.title')),
-    text,
-    h('button', { type: 'button', class: 'fact-next', onclick: next }, t('fact.next'), h('span', { 'aria-hidden': 'true' }, ' →')));
-}
-
+/** The first screen has no text card: the Earth–Moon–Mars scene and the menu bar (with its scroll cue) say it all.
+ *  The title stays for screen readers and search engines. */
 function startCard() {
-  return h('section', { class: 'card card-start' },
-    h('p', { class: 'eyebrow', id: 'now-line' }, nowLine()),
-    h('h1', {}, t('app.title')),
-    h('p', { class: 'tagline' }, t('start.line')),
-    factBox(),
-    h('div', { class: 'send' }, holdButton(() => goTo('moon'))),
-    h('div', { class: 'start-row' },
-      h('p', { class: 'cue' }, h('i', { 'aria-hidden': 'true' }), t('scroll.cue')),
-      h('button', { type: 'button', class: 'btn btn-sound-on', hidden: soundOn() ? '' : null, onclick: () => toggleSound(true) },
-        h('span', { class: 'eq', 'aria-hidden': 'true' }, h('i'), h('i'), h('i')), t('scroll.soundOn'))));
+  return h('section', { class: 'card card-start' }, h('h1', { class: 'sr-only' }, t('app.title')));
 }
 const nowLine = (now = new Date()) => t('v2.now', { date: fmtDate(now), time: now.toISOString().slice(11, 19) });
 
@@ -419,6 +393,7 @@ function paint(y) {
   // the Earth–Moon–Mars start screen fades out as the page starts toward the Moon
   J?.set(i === 0 ? 1 - band(u, 0.55, 0.95) : 0);
   paintMenu(i);
+  $('top-cue')?.classList.toggle('is-gone', i > 0 || u > 0.7);
 
   // Eagle's top half: on the lander until lift-off, gone after
   const iL = IDX.liftoff;
@@ -581,6 +556,9 @@ function paintMenu(i) {
 function buildChrome() {
   const item = (m) => h('a', { href: `#/${m.id}`, 'data-id': m.id, onclick: m.id === 'sources' ? null : (e) => { e.preventDefault(); goTo(m.id); } }, t(m.key));
   $('menu').setAttribute('aria-label', t('nav.menu'));
+  const cue = h('button', { type: 'button', class: 'cue top-cue', id: 'top-cue', onclick: () => goTo('moon') }, h('i', { 'aria-hidden': 'true' }), h('span', {}, t('scroll.cue')));
+  $('top-cue')?.remove();
+  document.querySelector('.tools').prepend(cue);
   $('menu').replaceChildren(h('div', { class: 'menu-main' }, ...MENU.filter((m) => m.main).map(item)), h('div', { class: 'menu-more' }, ...MENU.filter((m) => !m.main).map(item)));
   menuShown = undefined;
   document.querySelector('.langs').replaceChildren(...LANGUAGES.map(([code, label]) =>

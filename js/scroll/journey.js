@@ -185,23 +185,20 @@ export function createJourney(under, { onWorld } = {}) {
     show(marsLabel, mars, MARS_R, false);
   }
 
-  // size, and on wide screens keep the worlds in the right part (the title sits on the left)
-  let w = 0, hgt = 0, rtl = false;
+  // size (the scene is centred: no text covers it)
+  let w = 0, hgt = 0;
   const resize = () => {
     w = el.clientWidth; hgt = el.clientHeight;
     if (!w || !hgt) return;
     renderer.setSize(w, hgt, false);
     camera.aspect = w / hgt;
-    rtl = document.documentElement.dir === 'rtl';
-    const shift = w >= 760 ? (rtl ? w * 0.08 : -w * 0.2) : 0;               // Arabic: the title is on the right, so the worlds go left
-    camera.setViewOffset(w, hgt, shift, w >= 760 ? 0 : hgt * 0.24, w, hgt);   // phones: above the card
     camera.updateProjectionMatrix();
   };
   const observer = new ResizeObserver(resize);
   observer.observe(el);
 
   // camera: starts close to the Earth, pulls back, then sways slowly
-  const dist = () => OFFSET.length() * (camera.aspect < 1 ? Math.pow(Math.min(2.2, 1 / camera.aspect), 0.8) * 1.2 : 1);
+  const dist = () => OFFSET.length() * (camera.aspect < 1 ? Math.pow(Math.min(2.2, 1 / camera.aspect), 0.8) * 0.95 : 1);
   const target = () => (camera.aspect < 1 ? TARGET.clone().multiplyScalar(0.7) : TARGET.clone());
   const startPos = new THREE.Vector3(-3.5, 1.5, 6.5);
   const ease = (k) => 1 - Math.pow(1 - k, 3);
@@ -215,7 +212,6 @@ export function createJourney(under, { onWorld } = {}) {
     const dt = Math.min(100, now - last) / 1000;
     last = now;
     if (!on || document.hidden || !w) return;
-    if (rtl !== (document.documentElement.dir === 'rtl')) resize();
     const still = reduced(), k = still ? 0 : dt;
     clock += k;
     earth.rotation.y += 0.08 * k;
