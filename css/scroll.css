@@ -273,3 +273,14 @@ button.world:hover .world-pic { box-shadow: 0 0 0 2px rgba(255, 255, 255, .5), 0
 .sh-flame { animation: sh-flicker .12s steps(2) infinite alternate; transform-origin: 0 20px; }
 @keyframes sh-flicker { to { transform: scaleY(.85); opacity: .85; } }
 .journey-label { z-index: 3; }
+
+/* machines on the Moon and Mars: round photo bubbles on a short stem, like Google Earth */
+.label.photo-pin { flex-direction: column; align-items: center; gap: 4px; margin: 0; translate: -50% calc(-100% + 2px); }
+.label.photo-pin i { position: relative; width: 64px; height: 64px; border: 3px solid #fff; border-radius: 50%; overflow: hidden; background: #111;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, .6); transition: transform .25s; }
+.label.photo-pin i img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.label.photo-pin.status-still-working i { border-color: var(--accent); background: #111; }
+.label.photo-pin span { order: 2; font-size: .6875rem; padding: 2px 8px; }
+.label.photo-pin::after { content: ""; order: 3; width: 2px; height: 10px; background: #fff; border-radius: 1px; box-shadow: 0 0 4px #000; }
+.label.photo-pin:hover i, .label.photo-pin:focus-visible i { transform: scale(1.12); }
+@media (max-width: 760px) { .label.photo-pin i { width: 46px; height: 46px; border-width: 2px; } .label.photo-pin span { display: none; } }

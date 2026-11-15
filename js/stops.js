@@ -32,10 +32,11 @@ function teaser(a) {
   return out.trim();
 }
 
-/** Floating name tags for the machines on a world (click one to go there). */
+/** Round photo bubbles for the machines on a world, at their real sites, like Google Earth (click one to go there). */
 function pinsOn(U, body) {
   return CHAPTERS.find((c) => c.id === body).stops.filter(isMachine).map((id) => ({
-    id, text: artifact(id).name, kind: `pin status-${artifact(id).status}`, body, get: () => U.machinePos(id),
+    id, text: artifact(id).name, kind: `pin photo-pin status-${artifact(id).status}`, body, get: () => U.machinePos(id),
+    photo: imageOf(artifact(id))?.src,
   }));
 }
 

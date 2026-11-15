@@ -365,6 +365,11 @@ export function createUniverse(host, { onPick } = {}) {
       if (el.tagName === 'BUTTON') { el.type = 'button'; el.addEventListener('click', () => onPick(L.id)); }
       el.innerHTML = '<i></i><span></span>';
       el.lastChild.textContent = L.text;
+      if (L.photo) {                        // a round photo bubble on a short stem, the name under it
+        const img = document.createElement('img');
+        img.src = L.photo; img.alt = ''; img.decoding = 'async'; img.draggable = false;
+        el.firstChild.append(img);
+      }
       labelLayer.append(el);
       return { ...L, el };
     });
@@ -383,8 +388,8 @@ export function createUniverse(host, { onPick } = {}) {
       }
       const x = (tmp.x * 0.5 + 0.5) * w, y = (-tmp.y * 0.5 + 0.5) * h;
       // nudge labels that would sit on top of each other
-      let flip = x > w * 0.7;
-      if (placed.some((q) => Math.abs(q.y - y) < 22 && Math.abs(q.x - x) < 170 && q.flip === flip)) flip = !flip;
+      let flip = L.photo ? false : x > w * 0.7;
+      if (!L.photo && placed.some((q) => Math.abs(q.y - y) < 22 && Math.abs(q.x - x) < 170 && q.flip === flip)) flip = !flip;
       placed.push({ x, y, flip });
       L.el.style.transform = `translate(${x}px, ${y}px)`;
       L.el.classList.toggle('is-hidden', hidden);
@@ -619,6 +624,8 @@ export function createUniverse(host, { onPick } = {}) {
     focusMachine,
     freeRange,
     setLabels,
+    /** Show or hide every machine model (the Moon and Mars stops show photo bubbles instead). */
+    showMachines(on) { for (const m of machines.values()) if (m.holder) m.holder.visible = on; dirty = true; },
     updateSun,
     ready: (id) => machines.get(id)?.load?.() ?? Promise.resolve(),
     /** Resolves when the textures that are visible first have arrived (for the loading screen). */

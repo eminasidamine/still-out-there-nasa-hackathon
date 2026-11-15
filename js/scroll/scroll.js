@@ -447,6 +447,7 @@ function enterSeg(seg, i) {
   for (const w of [seg.world].flat()) if (w === 'moon' || w === 'mars') U.sharpen(w);
   U.setLabels(seg.kind === 'hold' ? view(seg.card)?.labels || [] : []);
   U.focusMachine(seg.site ?? null);
+  U.showMachines(!(seg.id === 'moon' || seg.id === 'mars'));      // photo bubbles there, not 3D models
   if (seg.kind === 'hold' && location.hash !== `#/${seg.id}` && !layerOpen()) history.replaceState(null, '', `#/${seg.id}`);
   // load the next machines' models before you get there
   for (const s of SEG.slice(i, i + 6)) {
