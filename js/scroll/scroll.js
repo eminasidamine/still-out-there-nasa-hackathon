@@ -3,6 +3,7 @@
 // The page is one tall track. Scroll position → which section you are in and how far through it (u, 0…1),
 // and u drives the camera, the cards, the readouts and the sound directly, so scrolling back rewinds everything.
 // Addresses: #/<stop> (e.g. #/opportunity), #/<machine>/story/<n>, #/story/<machine>, #/sources.
+import './intro.js';
 import { h } from '../v1/dom.js';
 import { t, loadLanguage, preferredLanguage, chooseLanguage, LANGUAGES, lang, fmtNumber, fmtDate } from '../i18n.js';
 import { loadData, artifact } from '../data.js';

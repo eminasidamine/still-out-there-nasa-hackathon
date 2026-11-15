@@ -160,5 +160,6 @@
   "journey.moon": "384,000 km · 3 days by rocket",
   "journey.mars": "About 225 million km · 7 months by rocket",
   "start.go": "Start the journey",
-  "scroll.dragTurn": "Drag to turn it"
+  "scroll.dragTurn": "Drag to turn it",
+  "intro.enter": "Scroll to enter"
 }

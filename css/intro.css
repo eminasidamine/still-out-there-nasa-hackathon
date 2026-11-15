@@ -1,0 +1,79 @@
+/* The entrance (js/scroll/intro.js): four pictures floating around the name, "Scroll to enter" at the bottom.
+   It sits above everything, including the loading curtain, and flies apart when you enter. */
+html.has-intro, html.has-intro body { overflow: hidden; }
+
+.intro { position: fixed; inset: 0; z-index: 100; overflow: hidden; background: #000; color: #f2efe8; }
+.intro-sky { position: absolute; inset: -10%;
+  background:
+    radial-gradient(1px 1px at 12% 18%, #fff 50%, transparent 51%), radial-gradient(1px 1px at 27% 63%, #fff 50%, transparent 51%),
+    radial-gradient(1.5px 1.5px at 41% 32%, #fff 50%, transparent 51%), radial-gradient(1px 1px at 58% 78%, #fff 50%, transparent 51%),
+    radial-gradient(1px 1px at 69% 22%, #fff 50%, transparent 51%), radial-gradient(1.5px 1.5px at 83% 54%, #fff 50%, transparent 51%),
+    radial-gradient(1px 1px at 91% 12%, #fff 50%, transparent 51%), radial-gradient(1px 1px at 6% 86%, #fff 50%, transparent 51%),
+    radial-gradient(1px 1px at 35% 92%, #fff 50%, transparent 51%), radial-gradient(1px 1px at 76% 90%, #fff 50%, transparent 51%),
+    radial-gradient(ellipse at 50% 120%, rgba(60, 90, 140, .25), transparent 60%), #000;
+  opacity: .8; animation: intro-drift 60s linear infinite alternate; }
+
+/* the four pictures: edges melt into the black, each floats gently */
+.intro-pic { position: absolute; margin: 0; pointer-events: none; transition: transform 1.3s cubic-bezier(.6, 0, .2, 1), opacity 1s ease; }
+.intro-pic img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.pic-earth { top: 0; right: 0; width: min(30vw, 520px); height: 100%; opacity: .85;
+  -webkit-mask-image: linear-gradient(to left, #000 35%, transparent); mask-image: linear-gradient(to left, #000 35%, transparent); }
+.pic-earth img { object-position: 20% 50%; animation: intro-float 18s ease-in-out infinite alternate; }
+.pic-cupola { left: 5vw; top: 11vh; width: min(30vmin, 340px); aspect-ratio: 1; border-radius: 50%; overflow: hidden; opacity: .9;
+  box-shadow: 0 0 60px rgba(120, 170, 255, .18); }
+.pic-cupola img { animation: intro-spin 160s linear infinite; }
+.pic-astronaut { right: 24vw; top: 7vh; width: min(24vmin, 260px); aspect-ratio: 1; opacity: .95; mix-blend-mode: screen;
+  -webkit-mask-image: radial-gradient(circle, #000 45%, transparent 70%); mask-image: radial-gradient(circle, #000 45%, transparent 70%); }
+.pic-astronaut img { animation: intro-astronaut 14s ease-in-out infinite alternate; }
+.pic-probe { left: 10vw; bottom: 6vh; width: min(24vmin, 270px); aspect-ratio: 650 / 800; opacity: .9; mix-blend-mode: screen;
+  -webkit-mask-image: radial-gradient(ellipse, #000 50%, transparent 72%); mask-image: radial-gradient(ellipse, #000 50%, transparent 72%); }
+.pic-probe img { animation: intro-float 11s ease-in-out infinite alternate-reverse; }
+
+/* the name, alone in the middle */
+.intro-title { position: absolute; left: 50%; top: 46%; transform: translate(-50%, -50%); margin: 0; display: grid; justify-items: center; gap: .1em;
+  font-family: var(--sans, system-ui); font-weight: 400; text-transform: uppercase; text-align: center; white-space: nowrap; line-height: 1;
+  text-shadow: 0 0 40px rgba(0, 0, 0, .9), 0 0 12px rgba(0, 0, 0, .8); transition: transform 1.3s cubic-bezier(.6, 0, .2, 1), opacity 1s ease, letter-spacing 1.3s ease; }
+.intro-title span { display: block; animation: intro-in 1.6s cubic-bezier(.2, .7, .2, 1) both; }
+.intro-title .t1 { font-size: clamp(1.6rem, 4.4vw, 3.6rem); letter-spacing: .5em; margin-inline-start: .5em; }
+.intro-title .t2 { font-size: clamp(1.1rem, 2.6vw, 2.2rem); letter-spacing: .5em; margin-inline-start: .5em; animation-delay: .15s; }
+.intro-title .t3 { font-size: clamp(2.6rem, 9vw, 7.5rem); font-weight: 600; letter-spacing: .32em; margin-inline-start: .32em; animation-delay: .3s; }
+
+/* a faint horizon and the way in */
+.intro-arc { position: absolute; left: -20%; right: -20%; bottom: -78vh; height: 100vh; border-radius: 50%; border-top: 1px solid rgba(255, 255, 255, .16);
+  background: radial-gradient(ellipse at 50% 0%, rgba(255, 255, 255, .05), transparent 45%); pointer-events: none; }
+.intro-enter { position: absolute; left: 50%; bottom: max(5vh, calc(env(safe-area-inset-bottom, 0px) + 20px)); transform: translateX(-50%); display: grid; justify-items: center; gap: 10px;
+  padding: 10px 18px; border: 0; background: none; color: rgba(242, 239, 232, .85); font: 400 clamp(1rem, 1.6vw, 1.3rem) var(--sans, system-ui); cursor: pointer; transition: opacity .6s; }
+.intro-enter:hover { color: #fff; }
+.intro-enter i { width: 26px; height: 26px; border-right: 2px solid currentColor; border-bottom: 2px solid currentColor; transform: rotate(45deg); animation: intro-bob 1.8s ease-in-out infinite;
+  box-shadow: 8px 8px 0 -6px transparent; }
+.intro-enter i::after { content: ""; display: block; width: 26px; height: 26px; border-right: 2px solid currentColor; border-bottom: 2px solid currentColor; transform: translate(-8px, -8px); opacity: .5; }
+
+/* entering: the pictures fly outward, the name grows and fades, the curtain lifts */
+.intro.is-leaving { pointer-events: none; animation: intro-out 1.3s ease .1s forwards; }
+.intro.is-leaving .pic-earth { transform: translateX(45%) scale(1.15); opacity: 0; }
+.intro.is-leaving .pic-cupola { transform: translate(-70%, -60%) scale(1.4); opacity: 0; }
+.intro.is-leaving .pic-astronaut { transform: translate(40%, -90%) scale(1.5) rotate(20deg); opacity: 0; }
+.intro.is-leaving .pic-probe { transform: translate(-60%, 80%) scale(1.4); opacity: 0; }
+.intro.is-leaving .intro-title { transform: translate(-50%, -50%) scale(1.8); opacity: 0; }
+.intro.is-leaving .intro-enter, .intro.is-leaving .intro-arc { opacity: 0; }
+
+@keyframes intro-in { from { opacity: 0; transform: translateY(18px); filter: blur(6px); } to { opacity: 1; transform: none; filter: none; } }
+@keyframes intro-out { to { background: transparent; opacity: 0; } }
+@keyframes intro-float { from { transform: translateY(-1.5%) scale(1.03); } to { transform: translateY(1.5%) scale(1.06); } }
+@keyframes intro-spin { to { transform: rotate(360deg); } }
+@keyframes intro-astronaut { from { transform: translate(-4%, 3%) rotate(-6deg); } to { transform: translate(4%, -3%) rotate(6deg); } }
+@keyframes intro-drift { to { transform: translate(-3%, -2%); } }
+@keyframes intro-bob { 0%, 100% { transform: rotate(45deg) translate(0, 0); } 50% { transform: rotate(45deg) translate(5px, 5px); } }
+
+/* phones: pictures in the corners, smaller; the Earth along the right edge */
+@media (max-width: 760px) {
+  .pic-earth { width: 46vw; opacity: .7; }
+  .pic-cupola { left: -8vw; top: 9vh; width: 44vw; }
+  .pic-astronaut { right: 8vw; top: 6vh; width: 34vw; }
+  .pic-probe { left: 4vw; bottom: 15vh; width: 36vw; }
+  .intro-title .t1 { letter-spacing: .4em; } .intro-title .t3 { letter-spacing: .18em; margin-inline-start: .18em; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .intro *, .intro-sky { animation: none !important; }
+  .intro-pic, .intro-title, .intro.is-leaving { transition: none; animation: none; }
+}
