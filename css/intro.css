@@ -26,10 +26,9 @@ html.has-intro, html.has-intro body { overflow: hidden; }
 .pic-earth { top: 0; right: 0; width: min(30vw, 520px); height: 100%; opacity: .85;
   -webkit-mask-image: linear-gradient(to left, #000 35%, transparent); mask-image: linear-gradient(to left, #000 35%, transparent); }
 .pic-earth img { object-position: 20% 50%; animation: intro-float 18s ease-in-out infinite alternate; }
-.pic-shuttle { left: 5vw; top: 8vh; width: min(34vmin, 380px); aspect-ratio: 1; mix-blend-mode: screen;
-  -webkit-mask-image: radial-gradient(circle closest-side at 52% 50%, #000 25%, rgba(0,0,0,.6) 55%, transparent 92%); mask-image: radial-gradient(circle closest-side at 52% 50%, #000 25%, rgba(0,0,0,.6) 55%, transparent 92%);
-  filter: saturate(.75) brightness(.95); opacity: .95; }
-.pic-shuttle img { animation: intro-climb 9s ease-in-out infinite alternate; }
+.pic-shuttle { left: 8vw; top: 6vh; width: min(22vmin, 220px); aspect-ratio: 3 / 4; mix-blend-mode: screen;
+  -webkit-mask-image: radial-gradient(ellipse closest-side at 50% 45%, #000 55%, transparent 100%); mask-image: radial-gradient(ellipse closest-side at 50% 45%, #000 55%, transparent 100%); }
+.pic-shuttle img { animation: intro-rise 7s ease-in-out infinite alternate; }
 .pic-astronaut { right: 24vw; top: 7vh; width: min(24vmin, 260px); aspect-ratio: 1; opacity: .95; mix-blend-mode: screen;
   -webkit-mask-image: radial-gradient(circle, #000 30%, transparent 58%); mask-image: radial-gradient(circle, #000 30%, transparent 58%); filter: brightness(.9) contrast(1.25); }
 .pic-astronaut img { animation: intro-astronaut 14s ease-in-out infinite alternate; }
@@ -39,7 +38,7 @@ html.has-intro, html.has-intro body { overflow: hidden; }
 
 /* the name, alone in the middle, on one line: STILL OUT (regular) THERE (bold) */
 .intro-title { position: absolute; left: 50%; top: 46%; transform: translate(-50%, -50%); margin: 0; display: flex; align-items: baseline; justify-content: center; gap: .35em;
-  font-family: "Jura", var(--sans, system-ui); font-size: clamp(2.1rem, 5.6vw, 5rem); text-transform: uppercase; white-space: nowrap; line-height: 1; letter-spacing: .32em; direction: ltr;
+  font-family: "Jura", var(--sans, system-ui); font-size: clamp(1.5rem, 3.6vw, 3.2rem); text-transform: uppercase; white-space: nowrap; line-height: 1; letter-spacing: .32em; direction: ltr;
   text-shadow: 0 0 40px rgba(0, 0, 0, .9), 0 0 12px rgba(0, 0, 0, .8); transition: transform 1.3s cubic-bezier(.6, 0, .2, 1), opacity 1s ease; }
 .intro-title > span { animation: intro-in 1.6s cubic-bezier(.2, .7, .2, 1) both; }
 .lk-1, .lk-2 { font-weight: 300; }
@@ -68,6 +67,7 @@ html.has-intro, html.has-intro body { overflow: hidden; }
 @keyframes intro-in { from { opacity: 0; transform: translateY(18px); filter: blur(6px); } to { opacity: 1; transform: none; filter: none; } }
 @keyframes intro-out { to { background: transparent; opacity: 0; } }
 @keyframes intro-float { from { transform: translateY(-1.5%) scale(1.03); } to { transform: translateY(1.5%) scale(1.06); } }
+@keyframes intro-rise { from { transform: translateY(4%); } to { transform: translateY(-4%); } }
 @keyframes intro-climb { from { transform: translate(-3%, 3%) scale(1.04); } to { transform: translate(3%, -3%) scale(1.08); } }
 @keyframes intro-astronaut { from { transform: translate(-4%, 3%) rotate(-6deg); } to { transform: translate(4%, -3%) rotate(6deg); } }
 @keyframes intro-drift { to { transform: translate(-3%, -2%); } }
@@ -76,10 +76,10 @@ html.has-intro, html.has-intro body { overflow: hidden; }
 /* phones: pictures in the corners, smaller; the Earth along the right edge */
 @media (max-width: 760px) {
   .pic-earth { width: 46vw; opacity: .7; }
-  .pic-shuttle { left: -4vw; top: 8vh; width: 50vw; }
+  .pic-shuttle { left: 6vw; top: 7vh; width: 32vw; }
   .pic-astronaut { right: 8vw; top: 6vh; width: 34vw; }
   .pic-probe { left: 4vw; bottom: 15vh; width: 36vw; }
-  .intro-title { font-size: 1.45rem; letter-spacing: .18em; }
+  .intro-title { font-size: 1.15rem; letter-spacing: .18em; }
 }
 @media (prefers-reduced-motion: reduce) {
   .intro *, .intro-sky, .intro-stars i { animation: none !important; }
