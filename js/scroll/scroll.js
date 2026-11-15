@@ -399,6 +399,7 @@ function paint(y) {
   J?.set(jo);
   U.cover(jo >= 0.999);                 // the start screen hides the big scene completely: don't draw both
   paintMenu(i);
+  document.body.classList.toggle('at-start', i === 0);
   $('top-cue')?.classList.toggle('is-gone', i > 0 || u > 0.7);
 
   // Eagle's top half: on the lander until lift-off, gone after
@@ -539,7 +540,7 @@ async function toggleSound(on = !soundOn()) { await setSound(on); paintSoundBtn(
 
 // The menu, as on the classic map: Journey · Moon · Mars on the left, Roll call · Sources on the right.
 const MENU = [
-  { id: 'start', key: 'nav.journey', main: true }, { id: 'moon', key: 'nav.moon', main: true }, { id: 'mars', key: 'nav.mars', main: true },
+  { id: 'moon', key: 'nav.moon', main: true }, { id: 'mars', key: 'nav.mars', main: true },
   { id: 'finale', key: 'nav.rollcall' }, { id: 'sources', key: 'nav.sources' },
 ];
 /** Which menu entry the scroll is in: the trip to a world counts as that world; deep space has none. */

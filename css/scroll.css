@@ -220,3 +220,8 @@ html { touch-action: pan-y; }
 body.is-turning .turn-hint { opacity: 0; }
 @media (min-width: 761px) { .turn-hint { left: auto; right: calc(var(--pad) + 60px); transform: none; } }
 @media (max-width: 760px) { .turn-hint { bottom: auto; top: calc(env(safe-area-inset-top, 0px) + 128px); } }
+
+/* the first screen keeps only the scene, the menu and its two buttons: no stop list on the side */
+body.at-start .rail { opacity: 0; pointer-events: none; }
+.rail { transition: opacity .4s; }
+@media (max-width: 760px) { .journey-sub { display: none; } }

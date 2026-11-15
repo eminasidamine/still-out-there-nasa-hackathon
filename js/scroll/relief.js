@@ -16,7 +16,7 @@ export function enhance(d, w, hgt, kind) {
   const S = new Float32Array(n);
   const gamma = kind === 'moon' ? 1.25 : 1.1;
   for (let i = 0; i < n; i++) S[i] = Math.pow(Math.min(1, Math.max(0, (L[i] - lo) / span)), gamma);
-  const k = kind === 'moon' ? 2.2 : 1.1;                    // how strong the relief is
+  const k = kind === 'moon' ? 1.4 : 1.0;                    // how strong the relief is
   for (let y = 0; y < hgt; y++) {
     const up = Math.max(0, y - 1) * w, down = Math.min(hgt - 1, y + 1) * w, row = y * w;
     for (let x = 0; x < w; x++) {
@@ -24,7 +24,7 @@ export function enhance(d, w, hgt, kind) {
       const relief = (S[up + xl] - S[down + xr]) * k;
       const i = row + x, j = i * 4;
       if (kind === 'moon') {
-        const v = Math.min(1, Math.max(0, S[i] * 0.95 + relief + 0.08));
+        const v = Math.min(1, Math.max(0, S[i] * 0.85 + relief + 0.16));
         d[j] = v * 255; d[j + 1] = v * 250; d[j + 2] = v * 244;
       } else {
         // Mars: scale each channel by the new brightness, so the reds, ochres and dark basalts stay as they are

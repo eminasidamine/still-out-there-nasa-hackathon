@@ -11,7 +11,7 @@ const reduced = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 const SIZE = 1.5;                                               // all three worlds 1.5× bigger, same proportions
 const EARTH_R = 2 * SIZE, MOON_R = 0.55 * SIZE, MARS_R = 1.25 * SIZE;
-const MOON_ORBIT = 7.2, MOON_PERIOD = 80;                      // seconds for one trip around the Earth
+const MOON_ORBIT = 7.2, MOON_PERIOD = 160;                      // seconds for one trip around the Earth
 const MARS_POS = new THREE.Vector3(24, 2.5, -17);
 const TARGET = new THREE.Vector3(10, 1.5, -6);                 // between the Earth and Mars
 const OFFSET = new THREE.Vector3(-12, 7, 26);                  // camera, seen from the target
@@ -42,7 +42,7 @@ export function createJourney(under, { onWorld } = {}) {
   renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 1.25));
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 1.1;
+  renderer.toneMappingExposure = 1.45;
   const canvas = renderer.domElement;
   canvas.className = 'journey-canvas';
   canvas.setAttribute('aria-hidden', 'true');
@@ -67,9 +67,10 @@ export function createJourney(under, { onWorld } = {}) {
   }
 
   // no Sun on screen: the light comes from one side, so each world shows a lit face and a night side
-  scene.add(new THREE.AmbientLight(0x5868a0, 0.28));
-  const light = new THREE.DirectionalLight(0xfff3e2, 3);
-  light.position.set(-30, 12, 22);
+  // light from just beside the camera: each world shows almost its whole sunlit face, like a full-disc photo
+  scene.add(new THREE.AmbientLight(0x8090b0, 0.35));
+  const light = new THREE.DirectionalLight(0xfff6ea, 3.2);
+  light.position.set(-12, 10, 30);
   scene.add(light);
 
   // small (2K) maps: the worlds are small here, and the first screen should appear fast
@@ -83,18 +84,28 @@ export function createJourney(under, { onWorld } = {}) {
     if (srgb) x.colorSpace = THREE.SRGBColorSpace;
     return x;
   };
+  // Big screens: once the first screen is up, the sharp 4K maps replace the 2K ones, one after the other.
+  const big = Math.min(screen.width, screen.height) >= 800 && !(navigator.deviceMemory && navigator.deviceMemory <= 4);
+  const upgrades = [];
+  const sharpLater = (fn) => { if (big) upgrades.push(fn); };
+  whenReady.then(() => setTimeout(function next() { const f = upgrades.shift(); if (f) f().finally(() => setTimeout(next, 400)); }, 1500));
+  const tex4k = (x, src) => sharpLater(() => new Promise((ok) => loader.load(src, (t4) => { x.image = t4.image; x.needsUpdate = true; ok(); }, undefined, ok)));
+  const texSharp = (src, srgb = true) => { const x = tex(src, srgb); tex4k(x, src); return x; };
   // the Moon and Mars: the clearer shaded-relief copy (relief.js), swapped in as soon as it is ready
   const clear = (src, kind) => {
     const x = tex(src);
-    reliefMap(src.replace('assets/maps/', 'assets/maps/2k/'), kind).then(({ image, flipY }) => { x.image = image; x.flipY = flipY; x.needsUpdate = true; }, () => {});
+    const put = ({ image, flipY }) => { x.image = image; x.flipY = flipY; x.needsUpdate = true; };
+    reliefMap(src.replace('assets/maps/', 'assets/maps/2k/'), kind).then(put, () => {});
+    sharpLater(() => reliefMap(src, kind).then(put, () => {}));
     return x;
   };
 
   // the Earth, with its clouds
-  const earth = new THREE.Mesh(new THREE.SphereGeometry(EARTH_R, 64, 48), new THREE.MeshStandardMaterial({ map: tex('assets/maps/earth.jpg'), roughness: 0.85 }));
+  const glowLift = (m, k) => { m.emissive = new THREE.Color(0xffffff); m.emissiveMap = m.map; m.emissiveIntensity = k; return m; };
+  const earth = new THREE.Mesh(new THREE.SphereGeometry(EARTH_R, 128, 96), glowLift(new THREE.MeshStandardMaterial({ map: texSharp('assets/maps/earth.jpg'), roughness: 0.7 }), 0.22));
   earth.rotation.z = 23.4 * RAD;
-  const clouds = new THREE.Mesh(new THREE.SphereGeometry(EARTH_R * 1.012, 64, 48),
-    new THREE.MeshStandardMaterial({ alphaMap: tex('assets/maps/earth-clouds.jpg', false), transparent: true, depthWrite: false, color: 0xffffff, roughness: 1 }));
+  const clouds = new THREE.Mesh(new THREE.SphereGeometry(EARTH_R * 1.012, 128, 96),
+    new THREE.MeshStandardMaterial({ alphaMap: texSharp('assets/maps/earth-clouds.jpg', false), transparent: true, depthWrite: false, color: 0xffffff, roughness: 1 }));
   earth.add(clouds);
   const earthAtmo = new THREE.Mesh(new THREE.SphereGeometry(EARTH_R * 1.025, 64, 48),
     new THREE.MeshBasicMaterial({ color: 0x6fb4ff, transparent: true, opacity: 0.12, side: THREE.BackSide, blending: THREE.AdditiveBlending, depthWrite: false }));
@@ -102,7 +113,7 @@ export function createJourney(under, { onWorld } = {}) {
   scene.add(earth, earthAtmo, earthGlow);
 
   // the Moon, going round the Earth
-  const moon = new THREE.Mesh(new THREE.SphereGeometry(MOON_R, 64, 48), new THREE.MeshStandardMaterial({ map: clear('assets/maps/moon.jpg', 'moon'), roughness: 1 }));
+  const moon = new THREE.Mesh(new THREE.SphereGeometry(MOON_R, 96, 64), glowLift(new THREE.MeshStandardMaterial({ map: clear('assets/maps/moon.jpg', 'moon'), roughness: 1 }), 0.18));
   const moonGlow = glowSprite(glowTexture('rgba(235,232,225,.35)', 'rgba(200,200,210,.08)'), MOON_R * 4.5, 0.7);
   scene.add(moon, moonGlow);
   const tilt = new THREE.Vector3(1, 0, 0);
@@ -111,11 +122,11 @@ export function createJourney(under, { onWorld } = {}) {
   const moonRing = new THREE.LineLoop(new THREE.BufferGeometry().setFromPoints(ringPts), new THREE.LineBasicMaterial({ color: 0xd8d4cc, transparent: true, opacity: 0.22 }));
   moonRing.rotation.x = 5 * RAD;
   scene.add(moonRing);
-  let moonAngle = 35 * RAD;
+  let moonAngle = -55 * RAD;                                   // starts in front of the Earth, on the camera side
   const moonAt = (a, out) => out.set(Math.cos(a) * MOON_ORBIT, 0, -Math.sin(a) * MOON_ORBIT).applyAxisAngle(tilt, 5 * RAD);
 
   // Mars, far away
-  const mars = new THREE.Mesh(new THREE.SphereGeometry(MARS_R, 64, 48), new THREE.MeshStandardMaterial({ map: clear('assets/maps/mars.jpg', 'mars'), roughness: 0.95 }));
+  const mars = new THREE.Mesh(new THREE.SphereGeometry(MARS_R, 128, 96), glowLift(new THREE.MeshStandardMaterial({ map: clear('assets/maps/mars.jpg', 'mars'), roughness: 0.95 }), 0.18));
   mars.position.copy(MARS_POS);
   mars.rotation.z = 25 * RAD;
   const marsGlow = glowSprite(glowTexture('rgba(255,150,100,.5)', 'rgba(255,100,60,.14)'), MARS_R * 5, 0.75);
@@ -193,7 +204,7 @@ export function createJourney(under, { onWorld } = {}) {
       v.project(camera);
       const x = (v.x * 0.5 + 0.5) * w, y = (-v.y * 0.5 + 0.5) * hgt;
       l.hidden = !(v.z < 1 && Math.abs(v.x) < 1.1 && Math.abs(v.y) < 1.1);
-      const goLeft = (left || x > w - (w >= 760 ? 330 : 190)) && x > 140;   // keep clear of the right edge and the stop list
+      const goLeft = (left || x > w - (w >= 760 ? 330 : 110)) && x > 140;   // keep clear of the right edge and the stop list
       l.style.transform = `translate(${goLeft ? `calc(${x - off}px - 100%)` : `${x + off}px`}, ${y}px) translateY(-50%)`;
     };
     const moonLeft = sx(moon) < sx(earth);
@@ -215,8 +226,8 @@ export function createJourney(under, { onWorld } = {}) {
   observer.observe(el);
 
   // camera: starts close to the Earth, pulls back, then sways slowly
-  const dist = () => OFFSET.length() * (camera.aspect < 1 ? Math.pow(Math.min(2.2, 1 / camera.aspect), 0.8) * 0.95 : 1);
-  const target = () => (camera.aspect < 1 ? TARGET.clone().multiplyScalar(0.7) : TARGET.clone());
+  const dist = () => OFFSET.length() * (camera.aspect < 1 ? Math.pow(Math.min(2.2, 1 / camera.aspect), 0.8) * 1.4 : 1);
+  const target = () => (camera.aspect < 1 ? TARGET.clone().multiplyScalar(0.85) : TARGET.clone());
   const startPos = new THREE.Vector3(-3.5, 1.5, 6.5);
   const ease = (k) => 1 - Math.pow(1 - k, 3);
   const t0 = performance.now();
