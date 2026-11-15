@@ -166,11 +166,31 @@ function buildPoses() {
 }
 
 // ---- cards ----------------------------------------------------------------------------------
+/** "Did you know?": short, true facts in simple words, one at a time (a new one every few seconds or on a tap). */
+const FACTS = 9;
+function factBox() {
+  let n = Math.floor(Math.random() * FACTS), timer = 0;
+  const text = h('p', { class: 'fact-text', 'aria-live': 'polite' });
+  const show = () => {
+    text.classList.remove('is-in'); void text.offsetWidth;
+    text.textContent = t(`fact.${n + 1}`);
+    text.classList.add('is-in');
+  };
+  const next = () => { n = (n + 1) % FACTS; show(); restart(); };
+  const restart = () => { clearInterval(timer); if (!reduced()) timer = setInterval(() => { if (!document.hidden) next(); }, 9000); };
+  show(); restart();
+  return h('div', { class: 'fact' },
+    h('p', { class: 'fact-title' }, h('span', { class: 'fact-icon', 'aria-hidden': 'true' }, '?'), t('fact.title')),
+    text,
+    h('button', { type: 'button', class: 'fact-next', onclick: next }, t('fact.next'), h('span', { 'aria-hidden': 'true' }, ' →')));
+}
+
 function startCard() {
   return h('section', { class: 'card card-start' },
     h('p', { class: 'eyebrow', id: 'now-line' }, nowLine()),
     h('h1', {}, t('app.title')),
     h('p', { class: 'tagline' }, t('start.line')),
+    factBox(),
     h('div', { class: 'send' }, holdButton(() => goTo('moon'))),
     h('div', { class: 'start-row' },
       h('p', { class: 'cue' }, h('i', { 'aria-hidden': 'true' }), t('scroll.cue')),
@@ -398,6 +418,7 @@ function paint(y) {
   U.frame(seg.frame ?? (seg.card === 'finale' ? 'right' : seg.card === 'start' ? 'none' : 'left'));
   // the Earth–Moon–Mars start screen fades out as the page starts toward the Moon
   J?.set(i === 0 ? 1 - band(u, 0.55, 0.95) : 0);
+  paintMenu(i);
 
   // Eagle's top half: on the lander until lift-off, gone after
   const iL = IDX.liftoff;
@@ -533,7 +554,35 @@ function paintSoundBtn() {
 }
 async function toggleSound(on = !soundOn()) { await setSound(on); paintSoundBtn(); }
 
+// The menu, as on the classic map: Journey · Moon · Mars on the left, Roll call · Sources on the right.
+const MENU = [
+  { id: 'start', key: 'nav.journey', main: true }, { id: 'moon', key: 'nav.moon', main: true }, { id: 'mars', key: 'nav.mars', main: true },
+  { id: 'finale', key: 'nav.rollcall' }, { id: 'sources', key: 'nav.sources' },
+];
+/** Which menu entry the scroll is in: the trip to a world counts as that world; deep space has none. */
+function menuAt(i) {
+  if (i < IDX.moon) return i <= IDX.start ? 'start' : null;
+  if (i < IDX.mars) return i <= IDX.echo ? 'moon' : null;
+  if (i < IDX.toDeep) return 'mars';
+  return i >= IDX.finale ? 'finale' : null;
+}
+let menuShown;
+function paintMenu(i) {
+  const here = menuAt(i);
+  if (here === menuShown) return;
+  menuShown = here;
+  for (const a of $('menu').querySelectorAll('a')) {
+    const on = a.dataset.id === here;
+    a.classList.toggle('is-current', on);
+    if (on) a.setAttribute('aria-current', 'true'); else a.removeAttribute('aria-current');
+  }
+}
+
 function buildChrome() {
+  const item = (m) => h('a', { href: `#/${m.id}`, 'data-id': m.id, onclick: m.id === 'sources' ? null : (e) => { e.preventDefault(); goTo(m.id); } }, t(m.key));
+  $('menu').setAttribute('aria-label', t('nav.menu'));
+  $('menu').replaceChildren(h('div', { class: 'menu-main' }, ...MENU.filter((m) => m.main).map(item)), h('div', { class: 'menu-more' }, ...MENU.filter((m) => !m.main).map(item)));
+  menuShown = undefined;
   document.querySelector('.langs').replaceChildren(...LANGUAGES.map(([code, label]) =>
     h('button', { type: 'button', lang: code, 'aria-pressed': String(code === lang), onclick: () => { if (code !== lang) chooseLanguage(code); } }, label)));
   $('rail').replaceChildren(...RAIL.map((id) => h('a', { href: `#/${id}`, onclick: (e) => { e.preventDefault(); goTo(id); } },

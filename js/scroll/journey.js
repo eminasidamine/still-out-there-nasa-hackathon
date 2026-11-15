@@ -157,8 +157,10 @@ export function createJourney(under, { onWorld } = {}) {
   }
 
   // names: the Moon and Mars can be clicked
+  // each name has a short line under it: how far, and how long the trip takes
   const label = (id, link) => {
-    const l = h(link ? 'button' : 'span', { class: `journey-label${link ? ' is-link' : ''}`, type: link ? 'button' : null, 'aria-hidden': link ? null : 'true' }, t(`body.${id}`));
+    const l = h(link ? 'button' : 'span', { class: `journey-label${link ? ' is-link' : ''}`, type: link ? 'button' : null, 'aria-hidden': link ? null : 'true' },
+      h('span', { class: 'journey-name' }, t(`body.${id}`)), h('span', { class: 'journey-sub' }, t(`journey.${id}`)));
     if (link) l.addEventListener('click', () => onWorld?.(id));
     labels.append(l);
     return l;
@@ -174,7 +176,7 @@ export function createJourney(under, { onWorld } = {}) {
       v.project(camera);
       const x = (v.x * 0.5 + 0.5) * w, y = (-v.y * 0.5 + 0.5) * hgt;
       l.hidden = !(v.z < 1 && Math.abs(v.x) < 1.1 && Math.abs(v.y) < 1.1);
-      const goLeft = (left || x > w - 140) && x > 140;
+      const goLeft = (left || x > w - (w >= 760 ? 330 : 190)) && x > 140;   // keep clear of the right edge and the stop list
       l.style.transform = `translate(${goLeft ? `calc(${x - off}px - 100%)` : `${x + off}px`}, ${y}px) translateY(-50%)`;
     };
     const moonLeft = sx(moon) < sx(earth);
@@ -184,13 +186,14 @@ export function createJourney(under, { onWorld } = {}) {
   }
 
   // size, and on wide screens keep the worlds in the right part (the title sits on the left)
-  let w = 0, hgt = 0;
+  let w = 0, hgt = 0, rtl = false;
   const resize = () => {
     w = el.clientWidth; hgt = el.clientHeight;
     if (!w || !hgt) return;
     renderer.setSize(w, hgt, false);
     camera.aspect = w / hgt;
-    const shift = w >= 760 ? -w * 0.17 : 0;
+    rtl = document.documentElement.dir === 'rtl';
+    const shift = w >= 760 ? (rtl ? w * 0.08 : -w * 0.2) : 0;               // Arabic: the title is on the right, so the worlds go left
     camera.setViewOffset(w, hgt, shift, w >= 760 ? 0 : hgt * 0.24, w, hgt);   // phones: above the card
     camera.updateProjectionMatrix();
   };
@@ -198,7 +201,7 @@ export function createJourney(under, { onWorld } = {}) {
   observer.observe(el);
 
   // camera: starts close to the Earth, pulls back, then sways slowly
-  const dist = () => OFFSET.length() * (camera.aspect < 1 ? Math.pow(Math.min(2.2, 1 / camera.aspect), 0.8) : 1);
+  const dist = () => OFFSET.length() * (camera.aspect < 1 ? Math.pow(Math.min(2.2, 1 / camera.aspect), 0.8) * 1.2 : 1);
   const target = () => (camera.aspect < 1 ? TARGET.clone().multiplyScalar(0.7) : TARGET.clone());
   const startPos = new THREE.Vector3(-3.5, 1.5, 6.5);
   const ease = (k) => 1 - Math.pow(1 - k, 3);
@@ -212,6 +215,7 @@ export function createJourney(under, { onWorld } = {}) {
     const dt = Math.min(100, now - last) / 1000;
     last = now;
     if (!on || document.hidden || !w) return;
+    if (rtl !== (document.documentElement.dir === 'rtl')) resize();
     const still = reduced(), k = still ? 0 : dt;
     clock += k;
     earth.rotation.y += 0.08 * k;

@@ -135,3 +135,50 @@ body.over-machine { cursor: pointer; }
 .journey-label { position: absolute; left: 0; top: 0; white-space: nowrap; font: 500 .72rem/1 var(--mono, ui-monospace, monospace); letter-spacing: .14em; text-transform: uppercase; color: rgba(242, 239, 232, .7); text-shadow: 0 0 8px #000; }
 .journey-label.is-link { pointer-events: auto; cursor: pointer; background: none; border: 1px solid rgba(242, 239, 232, .28); border-radius: 999px; padding: .5em .9em; color: #f2efe8; font-weight: 600; }
 .journey-label.is-link:hover, .journey-label.is-link:focus-visible { border-color: #ff6a33; color: #fff; }
+
+/* ---------- the menu bar, as on the classic map: a dark strip, wide-spaced capitals, a green line under where you are ---------- */
+.top { grid-template-columns: auto 1fr auto; gap: 0 28px; padding: env(safe-area-inset-top, 0px) var(--pad) 0; min-height: 64px;
+  background: linear-gradient(180deg, rgba(0, 0, 0, .88), rgba(0, 0, 0, .45)); border-bottom: 1px solid rgba(255, 255, 255, .08); backdrop-filter: blur(8px); }
+.brand { text-transform: uppercase; letter-spacing: .22em; font-size: .875rem; }
+.menu { display: flex; align-items: stretch; justify-content: space-between; align-self: stretch; gap: 24px; min-width: 0; }
+.menu-main, .menu-more { display: flex; align-items: stretch; gap: 4px; }
+.menu a { display: flex; align-items: center; padding: 0 14px; color: rgba(242, 239, 232, .62); text-decoration: none; text-transform: uppercase;
+  font-size: .8125rem; letter-spacing: .24em; white-space: nowrap; transition: color .2s, box-shadow .2s; }
+.menu a:hover { color: var(--ink); }
+.menu a.is-current { color: var(--ink); box-shadow: inset 0 -2px 0 #3ee08b; text-shadow: 0 0 14px rgba(62, 224, 139, .55); }
+[lang="ar"] .menu a, [lang="ar"] .brand { letter-spacing: 0; }
+.rail { top: calc(50% + 32px); }
+@media (max-width: 1180px) { .tool-classic { display: none; } .menu a { letter-spacing: .14em; padding: 0 10px; } }
+@media (max-width: 760px) {
+  .top { grid-template-columns: 1fr auto; grid-template-areas: "brand tools" "menu menu"; row-gap: 0; min-height: 0; padding-top: calc(env(safe-area-inset-top, 0px) + 8px); padding-inline: 0; }
+  .brand { padding-inline-start: 16px; font-size: .8125rem; letter-spacing: .14em; }
+  .tools { padding-inline-end: 12px; }
+  .menu { grid-area: menu; gap: 0; margin-top: 8px; border-top: 1px solid rgba(255, 255, 255, .08); overflow-x: auto; scrollbar-width: none; }
+  .menu-main, .menu-more { gap: 0; }
+  .menu-main { flex: 3; } .menu-more { flex: 2; }
+  .menu a { flex: 1; justify-content: center; min-height: 44px; padding: 0 6px; font-size: .6875rem; letter-spacing: .1em; }
+  .rail { top: calc(env(safe-area-inset-top, 0px) + 112px); }
+}
+
+/* ---------- "Did you know?" on the start card: one true fact at a time, in simple words ---------- */
+.fact { display: grid; gap: 6px; padding: 14px 16px; border: 1px solid rgba(62, 224, 139, .35); border-radius: 16px; background: rgba(10, 30, 20, .45); backdrop-filter: blur(6px); max-width: 34em; }
+.fact-title { display: flex; align-items: center; gap: 8px; margin: 0; font-weight: 600; font-size: .9375rem; color: #3ee08b; }
+.fact-icon { display: grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; background: #3ee08b; color: #00140a; font-size: .8125rem; font-weight: 700; }
+.fact-text { margin: 0; font-size: 1.0625rem; line-height: 1.45; color: var(--ink); min-height: 2.9em; }
+.fact-text.is-in { animation: fact-in .6s var(--ease, ease) both; }
+@keyframes fact-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+.fact-next { justify-self: start; padding: 4px 0; border: 0; background: none; color: rgba(242, 239, 232, .75); font: inherit; font-size: .875rem; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+.fact-next:hover { color: var(--ink); }
+@media (prefers-reduced-motion: reduce) { .fact-text.is-in { animation: none; } }
+@media (max-width: 760px) { .fact { padding: 10px 12px; } .fact-text { font-size: .9375rem; } }
+
+/* labels on the start scene: name, then distance and trip time */
+.journey-label { display: grid; gap: 3px; text-align: start; }
+.journey-name { font-size: .8125rem; }
+.journey-sub { font-family: var(--sans); text-transform: none; letter-spacing: 0; font-size: .75rem; font-weight: 400; color: rgba(242, 239, 232, .72); }
+.journey-label.is-link { border-radius: 14px; padding: .55em .9em; background: rgba(0, 0, 0, .45); }
+@media (max-width: 760px) {
+  .card-start #now-line { display: none; }
+  .journey-sub { display: none; }
+  .journey-label.is-link { padding: .4em .75em; }
+}
