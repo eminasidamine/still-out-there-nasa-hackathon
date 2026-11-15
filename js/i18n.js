@@ -2,7 +2,7 @@
 // English is always loaded underneath, so a missing translation shows English, never a raw key.
 let strings = {}, fallback = {};
 export let lang = 'en';
-export const LANGUAGES = [['en', 'EN'], ['fr', 'FR'], ['ar', 'عربي']];
+export const LANGUAGES = [['en', 'EN'], ['fr', 'FR']];          // Arabic is off for now (its files are kept in data/i18n)
 const RTL = new Set(['ar']);
 const KEY = 'still-out-there-v2:lang';
 
