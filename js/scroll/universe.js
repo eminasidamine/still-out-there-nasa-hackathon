@@ -13,6 +13,7 @@ import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { marsState } from '../time/marsTime.js';
 import { moonSubsolar } from '../time/moonTime.js';
 import { BUILT } from './models.js';
+import { reliefMap } from './relief.js';
 
 const RAD = Math.PI / 180;
 const gsap = globalThis.gsap;
@@ -108,7 +109,10 @@ export function createUniverse(host, { onPick } = {}) {
   const pending = new Map();            // file name → promise, for the loading screen
   // Fast first, sharp later: every map arrives first as its 2K copy (a quarter of the bytes), so the worlds show
   // quickly; on big screens the 4K copy replaces it a moment later, once the first screen is up.
+  const RELIEF = new Set(['moon', 'mars']);             // these two get the clearer, shaded-relief copy (relief.js)
   const read = (src, cb, fail) => {
+    const kind = src.split('/').pop().replace('.jpg', '');
+    if (RELIEF.has(kind)) { reliefMap(src, kind).then(({ image, flipY }) => cb(image, flipY), fail); return; }
     if (bitmaps) bitmaps.load(src, (img) => cb(img, false), undefined, fail);
     else tex.load(src, (img) => cb(img.image ?? img, true), undefined, fail);
   };
