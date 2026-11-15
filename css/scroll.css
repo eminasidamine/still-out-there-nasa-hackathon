@@ -175,3 +175,26 @@ body.over-machine { cursor: pointer; }
 .top-cue.is-gone { opacity: 0; visibility: hidden; }
 .sr-only { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
 @media (max-width: 760px) { .top-cue { padding-inline-end: 6px; font-size: .75rem; } .top-cue span { max-width: 9em; white-space: normal; line-height: 1.15; text-align: start; } .brand span:last-child { display: none; } }
+
+/* menu bar, tidier: the signal chip is not shown up here (it crowded the menu), languages are a drop-down,
+   sound is a speaker that shows a cross when muted */
+.top .signal { display: none !important; }
+.lang-pick { position: relative; display: inline-flex; align-items: center; gap: 6px; min-height: 38px; padding: 0 30px 0 12px; border: 1px solid var(--line); border-radius: 999px; background: var(--glass); color: var(--ink); cursor: pointer; }
+.lang-pick::after { content: ""; position: absolute; inset-inline-end: 13px; top: 50%; width: 6px; height: 6px; margin-top: -5px; border-right: 1.5px solid currentColor; border-bottom: 1.5px solid currentColor; transform: rotate(45deg); pointer-events: none; }
+.lang-pick select { appearance: none; -webkit-appearance: none; border: 0; background: none; color: inherit; font: inherit; font-size: .8125rem; cursor: pointer; padding: 6px 0; }
+.lang-pick select:focus { outline: none; }
+.lang-pick:focus-within { outline: 2px solid var(--accent); outline-offset: 2px; }
+.lang-pick option { color: #000; background: #fff; }
+#sound-btn { width: 38px; min-width: 38px; padding: 0; justify-content: center; }
+#sound-btn .spk-on { display: none; }
+#sound-btn[aria-pressed="true"] .spk-on { display: inline; }
+#sound-btn[aria-pressed="true"] .spk-off { display: none; }
+.menu { overflow: hidden; }
+@media (max-width: 1320px) { .tool-classic { display: none; } }
+@media (max-width: 760px) { .lang-pick { padding: 0 26px 0 10px; } .lang-pick svg { display: none; } }
+/* medium screens (tablets, small laptops): the menu takes its own row under the bar, as on phones */
+@media (min-width: 761px) and (max-width: 1100px) {
+  .top { grid-template-columns: 1fr auto; grid-template-areas: "brand tools" "menu menu"; row-gap: 0; min-height: 0; padding-top: calc(env(safe-area-inset-top, 0px) + 8px); }
+  .menu { grid-area: menu; margin-top: 8px; min-height: 46px; border-top: 1px solid rgba(255, 255, 255, .08); }
+  .rail { top: calc(50% + 56px); }
+}

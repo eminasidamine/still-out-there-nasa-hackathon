@@ -561,8 +561,12 @@ function buildChrome() {
   document.querySelector('.tools').prepend(cue);
   $('menu').replaceChildren(h('div', { class: 'menu-main' }, ...MENU.filter((m) => m.main).map(item)), h('div', { class: 'menu-more' }, ...MENU.filter((m) => !m.main).map(item)));
   menuShown = undefined;
-  document.querySelector('.langs').replaceChildren(...LANGUAGES.map(([code, label]) =>
-    h('button', { type: 'button', lang: code, 'aria-pressed': String(code === lang), onclick: () => { if (code !== lang) chooseLanguage(code); } }, label)));
+  // languages: a drop-down list (English, Français, العربية)
+  const NAMES = { en: 'English', fr: 'Français', ar: 'العربية' };
+  const pick = $('lang-select');
+  pick.replaceChildren(...LANGUAGES.map(([code, label]) => h('option', { value: code, lang: code, selected: code === lang ? '' : null }, NAMES[code] ?? label)));
+  pick.value = lang;
+  pick.onchange = () => { if (pick.value !== lang) chooseLanguage(pick.value); };
   $('rail').replaceChildren(...RAIL.map((id) => h('a', { href: `#/${id}`, onclick: (e) => { e.preventDefault(); goTo(id); } },
     h('span', {}, id === 'dust' ? t('stop.dust.name') : stopName(id)), h('i', { 'aria-hidden': 'true' }))));
   $('sound-btn').addEventListener('click', () => toggleSound());
