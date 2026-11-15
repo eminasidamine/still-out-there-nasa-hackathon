@@ -389,7 +389,7 @@ body:not(.is-ready) .top, body:not(.is-ready) .pager { opacity: 0; }
 }
 
 /* ---------- loading curtain ---------- */
-.boot { position: fixed; inset: 0; z-index: 90; display: grid; place-content: center; justify-items: center; gap: 18px; background: #000; color: var(--ink-2); }
+.boot { position: fixed; inset: 0; z-index: 120; display: grid; place-content: center; justify-items: center; gap: 18px; background: #000; color: var(--ink-2); }
 .boot-mark { position: relative; width: 22px; height: 22px; border: 2px solid var(--ink); border-radius: 50%; }
 .boot-mark::after { content: ""; position: absolute; inset: 4px; border-radius: 50%; background: var(--accent); animation: live 2s ease-out infinite; }
 .boot-text { font-size: .875rem; letter-spacing: .02em; }

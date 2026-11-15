@@ -86,3 +86,9 @@ html.has-intro, html.has-intro body { overflow: hidden; }
   .intro-stars i { opacity: .7; }
   .intro-pic, .intro-title, .intro.is-leaving { transition: none; animation: none; }
 }
+
+/* language, top right of the entrance */
+.intro-lang { position: absolute; z-index: 2; top: max(16px, env(safe-area-inset-top, 0px)); right: 18px; }
+[dir="rtl"] .intro-lang { right: auto; left: 18px; }
+/* the name waits for the loading screen to lift before it appears */
+.intro:not(.is-shown) .intro-title > span { animation-play-state: paused; }

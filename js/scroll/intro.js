@@ -1,6 +1,8 @@
 // The entrance: four pictures around the name, and "Scroll to enter". It covers the page while the journey loads
 // underneath. The first scroll, swipe, key or click sends the pictures flying outward and opens the journey.
 // It only shows when you arrive at the start; a link to a stop (#/moon …) goes straight there.
+import { LANGUAGES, preferredLanguage, chooseLanguage } from '../i18n.js';
+
 const intro = document.getElementById('intro');
 const reduced = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -21,10 +23,19 @@ if (intro) {
   if (!atStart) intro.remove();
   else {
     document.documentElement.classList.add('has-intro');
+    // language, chosen here already (the page reloads in the new language and comes back to this screen)
+    const NAMES = { en: 'English', fr: 'Français', ar: 'العربية' };
+    const pick = document.getElementById('intro-lang'), cur = preferredLanguage();
+    for (const [code, label] of LANGUAGES) { const o = document.createElement('option'); o.value = code; o.lang = code; o.textContent = NAMES[code] ?? label; pick?.append(o); }
+    if (pick) { pick.value = cur; pick.onchange = () => { if (pick.value !== cur) chooseLanguage(pick.value); }; }
+    // the loading screen comes first; this screen starts once it has lifted
+    const booting = () => !!document.getElementById('boot');
+    const shown = () => intro.classList.add('is-shown');
+    if (booting()) new MutationObserver((_, ob) => { if (!booting()) { ob.disconnect(); shown(); } }).observe(document.body, { childList: true }); else shown();
     let gone = false;
     const block = (e) => { if (!gone) e.preventDefault(); };
     const leave = () => {
-      if (gone) return;
+      if (gone || booting()) return;
       gone = true;
       removeEventListener('wheel', onWheel, { passive: false });
       removeEventListener('touchmove', block, { passive: false });
@@ -36,7 +47,7 @@ if (intro) {
     };
     const onWheel = (e) => { e.preventDefault(); if (e.deltaY > 4) leave(); };
     let y0 = null;
-    const onKey = (e) => { if ([' ', 'Enter', 'ArrowDown', 'PageDown', 'ArrowRight', 'ArrowLeft'].includes(e.key)) { e.preventDefault(); leave(); } };
+    const onKey = (e) => { if (e.target.closest?.('select')) return; if ([' ', 'Enter', 'ArrowDown', 'PageDown', 'ArrowRight', 'ArrowLeft'].includes(e.key)) { e.preventDefault(); leave(); } };
     addEventListener('wheel', onWheel, { passive: false });
     addEventListener('touchstart', (e) => { y0 = e.touches[0].clientY; }, { passive: true });
     addEventListener('touchmove', block, { passive: false });
