@@ -13,6 +13,7 @@
 - Mars time: NASA GISS Mars24 algorithm. https://www.giss.nasa.gov/tools/mars24/help/algorithm.html
 
 ## Software and fonts
+- Jura (entrance title), © The Jura Project Authors, SIL Open Font License 1.1: `vendor/fonts/jura-latin-300-normal.woff2`, `vendor/fonts/LICENSE-Jura.txt`
 - Astronomy Engine 2.1.19 by Don Cross, MIT License: `vendor/astronomy.browser.min.js`
 - Atkinson Hyperlegible, © Braille Institute of America, SIL Open Font License 1.1: `vendor/fonts/`
 - IBM Plex Mono, © IBM Corp., SIL Open Font License 1.1: `vendor/fonts/`

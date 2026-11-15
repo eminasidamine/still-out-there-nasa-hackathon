@@ -5,6 +5,18 @@ const intro = document.getElementById('intro');
 const reduced = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 if (intro) {
+  // many small stars that twinkle, each at its own pace (more on big screens)
+  const sky = document.createElement('div');
+  sky.className = 'intro-stars'; sky.setAttribute('aria-hidden', 'true');
+  const n = Math.round(Math.min(220, (innerWidth * innerHeight) / 7000));
+  for (let i = 0; i < n; i++) {
+    const st = document.createElement('i');
+    const big = Math.random() < 0.12;
+    st.style.cssText = `left:${(Math.random() * 100).toFixed(2)}%;top:${(Math.random() * 100).toFixed(2)}%;--s:${big ? 2.6 : 1 + Math.random() * 1.2}px;--d:${(2 + Math.random() * 4).toFixed(2)}s;--l:${(-Math.random() * 6).toFixed(2)}s`;
+    sky.append(st);
+  }
+  intro.querySelector('.intro-sky')?.after(sky);
+
   const atStart = ['', '#', '#/', '#/start'].includes(location.hash);
   if (!atStart) intro.remove();
   else {

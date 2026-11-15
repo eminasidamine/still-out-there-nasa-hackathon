@@ -1,8 +1,15 @@
+@font-face { font-family: "Jura"; font-weight: 300; font-display: swap; src: url("../vendor/fonts/jura-latin-300-normal.woff2") format("woff2"); }
+
 /* The entrance (js/scroll/intro.js): four pictures floating around the name, "Scroll to enter" at the bottom.
    It sits above everything, including the loading curtain, and flies apart when you enter. */
 html.has-intro, html.has-intro body { overflow: hidden; }
 
-.intro { position: fixed; inset: 0; z-index: 100; overflow: hidden; background: #000; color: #f2efe8; }
+.intro { position: fixed; inset: 0; z-index: 100; overflow: hidden; color: #f2efe8;
+  background: radial-gradient(ellipse 60% 55% at 18% 22%, rgba(24, 66, 84, .55), transparent 70%), radial-gradient(ellipse 80% 70% at 75% 40%, rgba(22, 40, 70, .5), transparent 70%), linear-gradient(160deg, #0b1220 0%, #070b14 55%, #04060b 100%); }
+.intro-stars { position: absolute; inset: 0; pointer-events: none; }
+.intro-stars i { position: absolute; width: var(--s); height: var(--s); border-radius: 50%; background: #fff; box-shadow: 0 0 calc(var(--s) * 3) rgba(200, 225, 255, .9);
+  animation: intro-twinkle var(--d) ease-in-out var(--l) infinite; opacity: .2; }
+@keyframes intro-twinkle { 0%, 100% { opacity: .15; transform: scale(.7); } 50% { opacity: 1; transform: scale(1.25); } }
 .intro-sky { position: absolute; inset: -10%;
   background:
     radial-gradient(1px 1px at 12% 18%, #fff 50%, transparent 51%), radial-gradient(1px 1px at 27% 63%, #fff 50%, transparent 51%),
@@ -20,7 +27,8 @@ html.has-intro, html.has-intro body { overflow: hidden; }
   -webkit-mask-image: linear-gradient(to left, #000 35%, transparent); mask-image: linear-gradient(to left, #000 35%, transparent); }
 .pic-earth img { object-position: 20% 50%; animation: intro-float 18s ease-in-out infinite alternate; }
 .pic-shuttle { left: 5vw; top: 8vh; width: min(34vmin, 380px); aspect-ratio: 1; mix-blend-mode: screen;
-  -webkit-mask-image: radial-gradient(circle closest-side at 52% 50%, #000 45%, transparent 100%); mask-image: radial-gradient(circle closest-side at 52% 50%, #000 45%, transparent 100%); }
+  -webkit-mask-image: radial-gradient(circle closest-side at 52% 50%, #000 25%, rgba(0,0,0,.6) 55%, transparent 92%); mask-image: radial-gradient(circle closest-side at 52% 50%, #000 25%, rgba(0,0,0,.6) 55%, transparent 92%);
+  filter: saturate(.75) brightness(.95); opacity: .95; }
 .pic-shuttle img { animation: intro-climb 9s ease-in-out infinite alternate; }
 .pic-astronaut { right: 24vw; top: 7vh; width: min(24vmin, 260px); aspect-ratio: 1; opacity: .95; mix-blend-mode: screen;
   -webkit-mask-image: radial-gradient(circle, #000 30%, transparent 58%); mask-image: radial-gradient(circle, #000 30%, transparent 58%); filter: brightness(.9) contrast(1.25); }
@@ -31,11 +39,12 @@ html.has-intro, html.has-intro body { overflow: hidden; }
 
 /* the name, alone in the middle, on one line: STILL OUT (regular) THERE (bold) */
 .intro-title { position: absolute; left: 50%; top: 46%; transform: translate(-50%, -50%); margin: 0; display: flex; align-items: baseline; justify-content: center; gap: .35em;
-  font-family: var(--sans, system-ui); font-size: clamp(2rem, 5.6vw, 4.8rem); text-transform: uppercase; white-space: nowrap; line-height: 1; letter-spacing: .06em; direction: ltr;
+  font-family: "Jura", var(--sans, system-ui); font-size: clamp(2.1rem, 5.6vw, 5rem); text-transform: uppercase; white-space: nowrap; line-height: 1; letter-spacing: .32em; direction: ltr;
   text-shadow: 0 0 40px rgba(0, 0, 0, .9), 0 0 12px rgba(0, 0, 0, .8); transition: transform 1.3s cubic-bezier(.6, 0, .2, 1), opacity 1s ease; }
 .intro-title > span { animation: intro-in 1.6s cubic-bezier(.2, .7, .2, 1) both; }
-.lk-1 { font-weight: 400; }
-.lk-2 { font-weight: 600; animation-delay: .2s !important; }
+.lk-1, .lk-2 { font-weight: 300; }
+.lk-2 { animation-delay: .2s !important; }
+.intro-title { margin-inline-start: .16em; }
 
 /* a faint horizon and the way in */
 .intro-arc { position: absolute; left: -20%; right: -20%; bottom: -78vh; height: 100vh; border-radius: 50%; border-top: 1px solid rgba(255, 255, 255, .16);
@@ -70,9 +79,10 @@ html.has-intro, html.has-intro body { overflow: hidden; }
   .pic-shuttle { left: -4vw; top: 8vh; width: 50vw; }
   .pic-astronaut { right: 8vw; top: 6vh; width: 34vw; }
   .pic-probe { left: 4vw; bottom: 15vh; width: 36vw; }
-  .intro-title { font-size: 1.75rem; letter-spacing: .04em; }
+  .intro-title { font-size: 1.45rem; letter-spacing: .18em; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .intro *, .intro-sky { animation: none !important; }
+  .intro *, .intro-sky, .intro-stars i { animation: none !important; }
+  .intro-stars i { opacity: .7; }
   .intro-pic, .intro-title, .intro.is-leaving { transition: none; animation: none; }
 }
