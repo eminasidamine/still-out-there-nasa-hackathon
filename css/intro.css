@@ -19,9 +19,9 @@ html.has-intro, html.has-intro body { overflow: hidden; }
 .pic-earth { top: 0; right: 0; width: min(30vw, 520px); height: 100%; opacity: .85;
   -webkit-mask-image: linear-gradient(to left, #000 35%, transparent); mask-image: linear-gradient(to left, #000 35%, transparent); }
 .pic-earth img { object-position: 20% 50%; animation: intro-float 18s ease-in-out infinite alternate; }
-.pic-moon { left: 6vw; top: 10vh; width: min(30vmin, 330px); aspect-ratio: 1; border-radius: 50%; overflow: hidden; mix-blend-mode: screen;
-  filter: drop-shadow(0 0 40px rgba(230, 228, 220, .18)); }
-.pic-moon img { animation: intro-float 16s ease-in-out infinite alternate; }
+.pic-shuttle { left: 5vw; top: 8vh; width: min(34vmin, 380px); aspect-ratio: 1; mix-blend-mode: screen;
+  -webkit-mask-image: radial-gradient(circle closest-side at 52% 50%, #000 45%, transparent 100%); mask-image: radial-gradient(circle closest-side at 52% 50%, #000 45%, transparent 100%); }
+.pic-shuttle img { animation: intro-climb 9s ease-in-out infinite alternate; }
 .pic-astronaut { right: 24vw; top: 7vh; width: min(24vmin, 260px); aspect-ratio: 1; opacity: .95; mix-blend-mode: screen;
   -webkit-mask-image: radial-gradient(circle, #000 30%, transparent 58%); mask-image: radial-gradient(circle, #000 30%, transparent 58%); filter: brightness(.9) contrast(1.25); }
 .pic-astronaut img { animation: intro-astronaut 14s ease-in-out infinite alternate; }
@@ -50,7 +50,7 @@ html.has-intro, html.has-intro body { overflow: hidden; }
 /* entering: the pictures fly outward, the name grows and fades, the curtain lifts */
 .intro.is-leaving { pointer-events: none; animation: intro-out 1.3s ease .1s forwards; }
 .intro.is-leaving .pic-earth { transform: translateX(45%) scale(1.15); opacity: 0; }
-.intro.is-leaving .pic-moon { transform: translate(-70%, -60%) scale(1.4); opacity: 0; }
+.intro.is-leaving .pic-shuttle { transform: translate(-70%, -60%) scale(1.4); opacity: 0; }
 .intro.is-leaving .pic-astronaut { transform: translate(40%, -90%) scale(1.5) rotate(20deg); opacity: 0; }
 .intro.is-leaving .pic-probe { transform: translate(-60%, 80%) scale(1.4); opacity: 0; }
 .intro.is-leaving .intro-title { transform: translate(-50%, -50%) scale(1.8); opacity: 0; }
@@ -59,7 +59,7 @@ html.has-intro, html.has-intro body { overflow: hidden; }
 @keyframes intro-in { from { opacity: 0; transform: translateY(18px); filter: blur(6px); } to { opacity: 1; transform: none; filter: none; } }
 @keyframes intro-out { to { background: transparent; opacity: 0; } }
 @keyframes intro-float { from { transform: translateY(-1.5%) scale(1.03); } to { transform: translateY(1.5%) scale(1.06); } }
-@keyframes intro-spin { to { transform: rotate(360deg); } }
+@keyframes intro-climb { from { transform: translate(-3%, 3%) scale(1.04); } to { transform: translate(3%, -3%) scale(1.08); } }
 @keyframes intro-astronaut { from { transform: translate(-4%, 3%) rotate(-6deg); } to { transform: translate(4%, -3%) rotate(6deg); } }
 @keyframes intro-drift { to { transform: translate(-3%, -2%); } }
 @keyframes intro-bob { 0%, 100% { transform: rotate(45deg) translate(0, 0); } 50% { transform: rotate(45deg) translate(5px, 5px); } }
@@ -67,7 +67,7 @@ html.has-intro, html.has-intro body { overflow: hidden; }
 /* phones: pictures in the corners, smaller; the Earth along the right edge */
 @media (max-width: 760px) {
   .pic-earth { width: 46vw; opacity: .7; }
-  .pic-moon { left: -6vw; top: 9vh; width: 42vw; }
+  .pic-shuttle { left: -4vw; top: 8vh; width: 50vw; }
   .pic-astronaut { right: 8vw; top: 6vh; width: 34vw; }
   .pic-probe { left: 4vw; bottom: 15vh; width: 36vw; }
   .intro-title { font-size: 1.75rem; letter-spacing: .04em; }
