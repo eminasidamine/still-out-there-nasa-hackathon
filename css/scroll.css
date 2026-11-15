@@ -233,10 +233,11 @@ body.at-start .rail { opacity: 0; pointer-events: none; }
 .world { position: absolute; padding: 0; margin: 0; border: 0; background: none; border-radius: 50%; pointer-events: auto; cursor: default; }
 button.world { cursor: pointer; }
 .world-pic { display: block; width: 100%; height: 100%; border-radius: 50%; animation: world-float 9s ease-in-out infinite alternate; }
-.world-pic img { display: block; width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
-.world-earth { left: 9vw; top: 30vh; width: 36vh; }
+.world-canvas { display: block; width: 100%; height: 100%; border-radius: 50%; }
+.world-earth { left: 12vw; top: 30vh; width: 36vh; z-index: 1; }
 .world-earth .world-pic { box-shadow: 0 0 60px rgba(90, 160, 255, .35); }
-.world-moon { left: 37vw; top: 58vh; width: 12vh; }
+.world-moon { left: 0; top: 0; width: 12vh; will-change: transform; }
+.world-moon .world-pic { animation: none !important; }
 .world-moon .world-pic { box-shadow: 0 0 34px rgba(230, 230, 225, .22); animation-duration: 7s; animation-delay: -2s; }
 .world-mars { right: 18vw; top: 17vh; width: 20vh; }
 .world-mars .world-pic { box-shadow: 0 0 46px rgba(255, 110, 60, .35); animation-duration: 11s; animation-delay: -5s; }
@@ -259,7 +260,7 @@ button.world:hover .world-pic { box-shadow: 0 0 0 2px rgba(255, 255, 255, .5), 0
 
 @media (max-width: 760px) {
   .world-earth { left: 6vw; top: 26vh; width: 44vw; }
-  .world-moon { left: 60vw; top: 44vh; width: 16vw; }
+  .world-moon { width: 15vw; }
   .world-mars { right: 8vw; top: 15vh; width: 24vw; }
   .journey-label { text-align: center; font-size: .6875rem; }
   .journey-label .journey-sub { display: none; }
@@ -267,3 +268,8 @@ button.world:hover .world-pic { box-shadow: 0 0 0 2px rgba(255, 255, 255, .5), 0
 }
 @media (prefers-reduced-motion: reduce) { .world-pic, .route { animation: none; } }
 .journey-label.is-under { text-align: center; justify-items: center; }
+
+.shuttle { filter: drop-shadow(0 0 4px rgba(160, 210, 255, .6)); }
+.sh-flame { animation: sh-flicker .12s steps(2) infinite alternate; transform-origin: 0 20px; }
+@keyframes sh-flicker { to { transform: scaleY(.85); opacity: .85; } }
+.journey-label { z-index: 3; }
