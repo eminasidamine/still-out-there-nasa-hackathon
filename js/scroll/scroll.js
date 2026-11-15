@@ -14,7 +14,7 @@ import { rollCall } from '../rollcall.js';
 import { lightTimes, clock, kmOf } from '../reach.js';
 import { daysSince } from '../live.js';
 import { soundOn, setSound, mix, captions } from './sound.js';
-import { layerOpen, closeLayer, showStory, showPhoto, showSources, paintSignal, paintPayoff } from './layers.js';
+import { layerOpen, closeLayer, showStory, showPhoto, showSources, holdButton, paintSignal, paintPayoff } from './layers.js';
 
 const $ = (id) => document.getElementById(id);
 const gsap = globalThis.gsap;
@@ -166,10 +166,13 @@ function buildPoses() {
 }
 
 // ---- cards ----------------------------------------------------------------------------------
-/** The first screen has no text card: the Earth–Moon–Mars scene and the menu bar (with its scroll cue) say it all.
- *  The title stays for screen readers and search engines. */
+/** The first screen: no text, only the Earth–Moon–Mars scene, the menu bar (with its scroll cue) and, at the
+ *  bottom, two buttons: hold to send a signal, or start the journey. The title stays for screen readers. */
 function startCard() {
-  return h('section', { class: 'card card-start' }, h('h1', { class: 'sr-only' }, t('app.title')));
+  return h('section', { class: 'card card-start' }, h('h1', { class: 'sr-only' }, t('app.title')),
+    h('div', { class: 'start-actions' },
+      holdButton(() => goTo('moon')),
+      h('button', { type: 'button', class: 'btn btn-go', onclick: () => goTo('moon') }, t('start.go'), h('span', { 'aria-hidden': 'true' }, ' →'))));
 }
 const nowLine = (now = new Date()) => t('v2.now', { date: fmtDate(now), time: now.toISOString().slice(11, 19) });
 
@@ -251,7 +254,7 @@ function view(card) {
   if (views.has(card)) return views.get(card);
   const own = { start: startCard, eagleArrive: eagleArriveCard, liftoff: liftoffCard, dust: dustCard, lastCall: lastCallCard }[card];
   let v;
-  if (own) v = { el: own(), wide: card === 'start', center: card === 'lastCall' };
+  if (own) v = { el: own(), center: card === 'lastCall' };
   else { const s = buildStop(card, ctx); v = { el: s.el, labels: s.labels, leave: s.leave, side: !!s.side }; }
   if (card === 'start') v.labels = [];                     // the start screen names its worlds itself (journey.js)
   views.set(card, v);
