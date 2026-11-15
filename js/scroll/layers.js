@@ -1,7 +1,7 @@
 // What sits on top of the scroll journey: the story player, the photo lightbox and the sources sheet
 // (one #layer, as on the classic site), plus the signal you send at the start and its payoff at the finale.
 // Adapted from js/app.js so the classic page keeps working unchanged.
-import { h, statusMark } from '../v1/dom.js';
+import { h } from '../v1/dom.js';
 import { t, lang } from '../i18n.js';
 import { db } from '../data.js';
 import { openStory, imageOf } from '../story.js';

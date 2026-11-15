@@ -5,7 +5,7 @@ import { t, fmtNumber } from './i18n.js';
 import { db, artifact, placeOf, noteOf } from './data.js';
 import { tickerLine, liveSummary, daysSince, formatDate } from './live.js';
 import { moonSurfaceKm } from './v1/beam.js';
-import { lightTimes, planetLightSeconds, clock, C_KM_S } from './reach.js';
+import { lightTimes, clock, C_KM_S } from './reach.js';
 import { imageOf, audioOf, sentences } from './story.js';
 
 export const CHAPTERS = [
@@ -25,11 +25,6 @@ function storyMinutes(id) {
   let sec = 0;
   for (const c of ['why', 'how', 'found', 'lastDay', 'carriesOn']) { const x = db.narration?.clips?.[`${id}.${c}`]; if (x?.sentences?.length) sec += x.sentences.at(-1)[1]; }
   return Math.max(1, Math.ceil(sec / 60));
-}
-function teaser(a) {
-  let out = '';
-  for (const x of t(`story.${a.id}.why`).match(/[^.!?…؟]+[.!?…؟]+["'’”»)]*/g) ?? []) { if (out.length > 70) break; out += x; }
-  return out.trim();
 }
 
 /** Round photo bubbles for the machines on a world, at their real sites, like Google Earth (click one to go there). */

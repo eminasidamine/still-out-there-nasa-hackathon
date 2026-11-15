@@ -85,7 +85,6 @@ function flightReadout(fromId, toId) {
 
 async function show(id, { animate = true } = {}) {
   const fromId = currentId;
-  const dir = SEQ.indexOf(id) >= SEQ.indexOf(fromId ?? 'start') ? 1 : -1;
   const cardBox = $('card');
   const old = cardBox.firstElementChild;
   if (old && animate && !reduced()) await gsap.to(old, { opacity: 0, y: 16, duration: 0.25, ease: 'power2.in' });

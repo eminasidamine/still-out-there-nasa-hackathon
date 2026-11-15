@@ -564,6 +564,9 @@ function paintMenu(i) {
 }
 
 function buildChrome() {
+  const bar = document.querySelector('.top');
+  const setBar = () => document.documentElement.style.setProperty('--bar', `${Math.ceil(bar.getBoundingClientRect().bottom)}px`);
+  new ResizeObserver(setBar).observe(bar); setBar();
   const item = (m) => h('a', { href: `#/${m.id}`, 'data-id': m.id, onclick: m.id === 'sources' ? null : (e) => { e.preventDefault(); goTo(m.id); } }, t(m.key));
   $('menu').setAttribute('aria-label', t('nav.menu'));
   const cue = h('button', { type: 'button', class: 'cue top-cue', id: 'top-cue', onclick: () => goTo('moon') }, h('i', { 'aria-hidden': 'true' }), h('span', {}, t('scroll.cue')));

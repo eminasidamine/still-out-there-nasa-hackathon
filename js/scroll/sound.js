@@ -8,8 +8,6 @@
 const KEY = 'still-out-there-v2:scroll-sound';
 const LOOP_S = { moon: 6779977 / 44100, mars: 9400612 / 44100, deep: 4310265 / 44100 };   // assets/audio/music/, exact loop lengths
 const MUSIC = 0.2;                       // same level as the classic journey's music
-const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
-const band = (u, a, b) => clamp((u - a) / (b - a));
 
 const REAL = { ascent: 'apollo11-ascent-onboard', cruise: 'perseverance-cruise-loop', wind: 'mars-wind-sol4-loop', devil: 'mars-dust-devil' };
 // Captions for the lift-off clip, in NASA's own words (Apollo Lunar Surface Journal, 124:21:54 to 124:22:15 GET).

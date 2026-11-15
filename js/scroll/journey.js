@@ -10,28 +10,10 @@ const reduced = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
 const SVGNS = 'http://www.w3.org/2000/svg';
 const S = (tag, attrs = {}, ...kids) => { const e = document.createElementNS(SVGNS, tag); for (const [k, v] of Object.entries(attrs)) e.setAttribute(k, v); e.append(...kids); return e; };
 
-/** A space shuttle seen from above, nose up, on a blue flame (local units: about 40 tall). */
-function shuttle(scale) {
-  const flame = S('g', { class: 'sh-flame' },
-    S('ellipse', { cx: 0, cy: 34, rx: 5.5, ry: 20, fill: 'url(#sh-glow)' }),
-    S('ellipse', { cx: 0, cy: 24, rx: 2.4, ry: 10, fill: '#ffffff' }));
-  return S('g', { class: 'shuttle' }, S('g', { transform: `scale(${scale})` },
-    flame,
-    S('path', { d: 'M0 -22 C3 -20 4 -14 4 -8 L4 10 L15 15 L15 18 L4 17 L3 20 L-3 20 L-4 17 L-15 18 L-15 15 L-4 10 L-4 -8 C-4 -14 -3 -20 0 -22 Z', fill: '#eef2f7', stroke: '#9aa6b5', 'stroke-width': 0.6 }),
-    S('path', { d: 'M0 -22 C2 -21 3 -18 3.2 -15 L-3.2 -15 C-3 -18 -2 -21 0 -22 Z', fill: '#1d2430' }),          // black nose
-    S('path', { d: 'M-15 15 L-4 10 L-4 13 L-14 17 Z M15 15 L4 10 L4 13 L14 17 Z', fill: '#2a3140', opacity: 0.85 }),   // dark wing edges
-    S('rect', { x: -1, y: -2, width: 2, height: 13, fill: '#c9d2dd' }),                                    // payload-bay line
-    S('path', { d: 'M-3 20 L-2 23 L2 23 L3 20 Z', fill: '#58616e' })));                                    // engines
-}
-
 /** onWorld(id) is called when someone clicks the Moon or Mars. */
 export function createJourney(under, { onWorld } = {}) {
-  const defs = S('defs', {}, S('radialGradient', { id: 'sh-glow', cx: '50%', cy: '30%', r: '60%' },
-    S('stop', { offset: '0%', 'stop-color': '#ffffff' }), S('stop', { offset: '35%', 'stop-color': '#9fd2ff' }),
-    S('stop', { offset: '100%', 'stop-color': '#2f7bff', 'stop-opacity': 0 })));
   const marsRoute = S('path', { class: 'route route-mars' }), moonRoute = S('path', { class: 'route route-moon' });
-  const ships = [];                                  // no shuttles on the routes (removed on request)
-  const svg = S('svg', { class: 'journey-routes', 'aria-hidden': 'true' }, defs, marsRoute, moonRoute, ...ships.map((s) => s.g));
+  const svg = S('svg', { class: 'journey-routes', 'aria-hidden': 'true' }, marsRoute, moonRoute);
 
   const world = (id, link, opts) => {
     const canvas = h('canvas', { class: 'world-canvas' });
@@ -108,15 +90,6 @@ export function createJourney(under, { onWorld } = {}) {
         if (!still) spun[id] += SPIN[id] * step;
         w.globe.set(spun[id]);
       }
-    }
-    for (const s of ships) {
-      const len = s.route.getTotalLength?.() || 0;
-      if (!len || still) { s.g.style.opacity = 0; continue; }
-      const k = ((clock * 1000 / s.period + s.offset) % 1 + 1) % 1;
-      const p = s.route.getPointAtLength(k * len), q = s.route.getPointAtLength(Math.min(len, k * len + 2));
-      const ang = Math.atan2(q.y - p.y, q.x - p.x) * 180 / Math.PI + 90;
-      s.g.setAttribute('transform', `translate(${p.x} ${p.y}) rotate(${ang})`);
-      s.g.style.opacity = Math.min(1, k * 7, (1 - k) * 7);
     }
   }
   raf = requestAnimationFrame(frame);
