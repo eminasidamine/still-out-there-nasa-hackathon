@@ -19,9 +19,9 @@ html.has-intro, html.has-intro body { overflow: hidden; }
 .pic-earth { top: 0; right: 0; width: min(30vw, 520px); height: 100%; opacity: .85;
   -webkit-mask-image: linear-gradient(to left, #000 35%, transparent); mask-image: linear-gradient(to left, #000 35%, transparent); }
 .pic-earth img { object-position: 20% 50%; animation: intro-float 18s ease-in-out infinite alternate; }
-.pic-cupola { left: 5vw; top: 11vh; width: min(30vmin, 340px); aspect-ratio: 1; border-radius: 50%; overflow: hidden; opacity: .9;
-  box-shadow: 0 0 60px rgba(120, 170, 255, .18); }
-.pic-cupola img { animation: intro-spin 160s linear infinite; }
+.pic-moon { left: 6vw; top: 10vh; width: min(30vmin, 330px); aspect-ratio: 1; border-radius: 50%; overflow: hidden; mix-blend-mode: screen;
+  filter: drop-shadow(0 0 40px rgba(230, 228, 220, .18)); }
+.pic-moon img { animation: intro-float 16s ease-in-out infinite alternate; }
 .pic-astronaut { right: 24vw; top: 7vh; width: min(24vmin, 260px); aspect-ratio: 1; opacity: .95; mix-blend-mode: screen;
   -webkit-mask-image: radial-gradient(circle, #000 30%, transparent 58%); mask-image: radial-gradient(circle, #000 30%, transparent 58%); filter: brightness(.9) contrast(1.25); }
 .pic-astronaut img { animation: intro-astronaut 14s ease-in-out infinite alternate; }
@@ -29,16 +29,13 @@ html.has-intro, html.has-intro body { overflow: hidden; }
   -webkit-mask-image: radial-gradient(ellipse, #000 50%, transparent 72%); mask-image: radial-gradient(ellipse, #000 50%, transparent 72%); }
 .pic-probe img { animation: intro-float 11s ease-in-out infinite alternate-reverse; }
 
-/* the name, alone in the middle, as a lockup: NASA | still out / there */
-.intro-title { position: absolute; left: 50%; top: 46%; transform: translate(-50%, -50%); margin: 0; display: flex; align-items: center; gap: clamp(14px, 2vw, 28px);
-  font-family: var(--sans, system-ui); text-transform: uppercase; white-space: nowrap; line-height: 1; direction: ltr;
+/* the name, alone in the middle, on one line: STILL OUT (regular) THERE (bold) */
+.intro-title { position: absolute; left: 50%; top: 46%; transform: translate(-50%, -50%); margin: 0; display: flex; align-items: baseline; justify-content: center; gap: .35em;
+  font-family: var(--sans, system-ui); font-size: clamp(2rem, 5.6vw, 4.8rem); text-transform: uppercase; white-space: nowrap; line-height: 1; letter-spacing: .06em; direction: ltr;
   text-shadow: 0 0 40px rgba(0, 0, 0, .9), 0 0 12px rgba(0, 0, 0, .8); transition: transform 1.3s cubic-bezier(.6, 0, .2, 1), opacity 1s ease; }
 .intro-title > span { animation: intro-in 1.6s cubic-bezier(.2, .7, .2, 1) both; }
-.lk-nasa { font-size: clamp(3rem, 9vw, 7.5rem); font-weight: 600; letter-spacing: .02em; }
-.lk-bar { align-self: stretch; width: 2px; margin-block: .15em; background: rgba(242, 239, 232, .85); animation-delay: .15s !important; }
-.lk-name { display: grid; gap: .3em; font-size: clamp(1.05rem, 2.6vw, 2.2rem); letter-spacing: .04em; animation-delay: .3s !important; }
 .lk-1 { font-weight: 400; }
-.lk-2 { font-weight: 600; }
+.lk-2 { font-weight: 600; animation-delay: .2s !important; }
 
 /* a faint horizon and the way in */
 .intro-arc { position: absolute; left: -20%; right: -20%; bottom: -78vh; height: 100vh; border-radius: 50%; border-top: 1px solid rgba(255, 255, 255, .16);
@@ -53,7 +50,7 @@ html.has-intro, html.has-intro body { overflow: hidden; }
 /* entering: the pictures fly outward, the name grows and fades, the curtain lifts */
 .intro.is-leaving { pointer-events: none; animation: intro-out 1.3s ease .1s forwards; }
 .intro.is-leaving .pic-earth { transform: translateX(45%) scale(1.15); opacity: 0; }
-.intro.is-leaving .pic-cupola { transform: translate(-70%, -60%) scale(1.4); opacity: 0; }
+.intro.is-leaving .pic-moon { transform: translate(-70%, -60%) scale(1.4); opacity: 0; }
 .intro.is-leaving .pic-astronaut { transform: translate(40%, -90%) scale(1.5) rotate(20deg); opacity: 0; }
 .intro.is-leaving .pic-probe { transform: translate(-60%, 80%) scale(1.4); opacity: 0; }
 .intro.is-leaving .intro-title { transform: translate(-50%, -50%) scale(1.8); opacity: 0; }
@@ -70,10 +67,10 @@ html.has-intro, html.has-intro body { overflow: hidden; }
 /* phones: pictures in the corners, smaller; the Earth along the right edge */
 @media (max-width: 760px) {
   .pic-earth { width: 46vw; opacity: .7; }
-  .pic-cupola { left: -8vw; top: 9vh; width: 44vw; }
+  .pic-moon { left: -6vw; top: 9vh; width: 42vw; }
   .pic-astronaut { right: 8vw; top: 6vh; width: 34vw; }
   .pic-probe { left: 4vw; bottom: 15vh; width: 36vw; }
-  .lk-nasa { font-size: 2.9rem; } .lk-name { font-size: 1.05rem; }
+  .intro-title { font-size: 1.75rem; letter-spacing: .04em; }
 }
 @media (prefers-reduced-motion: reduce) {
   .intro *, .intro-sky { animation: none !important; }
