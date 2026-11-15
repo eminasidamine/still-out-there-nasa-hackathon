@@ -21,17 +21,14 @@ def hz(note):
     return 440.0 * 2 ** ((n + 12 * (int(rest) + 1) - 69) / 12)
 
 WORLDS = {
-    # calm and bright: the Moon, sunlight and silence
     'moon': dict(chord_s=8, cutoff=2600, bells_per_s=0.30, bell_decay=2.6, wet=0.35, seed=11,
                  chords=[['C3', 'G3', 'E4', 'B4', 'D5'], ['A2', 'E3', 'C4', 'G4', 'B4'],
                          ['F2', 'C3', 'A3', 'E4', 'G4'], ['G2', 'D3', 'B3', 'E4', 'A4']],
                  bells=['C5', 'D5', 'E5', 'G5', 'A5', 'C6', 'D6', 'E6']),
-    # warmer, lower, a little mysterious: dust and red rock
     'mars': dict(chord_s=8, cutoff=1500, bells_per_s=0.20, bell_decay=3.2, wet=0.40, seed=23,
                  chords=[['D3', 'A3', 'F4', 'C5', 'E5'], ['Bb2', 'F3', 'D4', 'A4', 'C5'],
                          ['C3', 'G3', 'E4', 'A4', 'D5'], ['A2', 'E3', 'C4', 'G4', 'D5']],
                  bells=['D5', 'E5', 'F5', 'A5', 'C6', 'D6']),
-    # slow and spacious, a little lonely: drifting between the stars
     'deep': dict(chord_s=10, cutoff=2000, bells_per_s=0.12, bell_decay=4.5, wet=0.55, seed=37,
                  chords=[['A2', 'E3', 'B3', 'C4', 'E4'], ['F2', 'C3', 'A3', 'B3', 'E4'],
                          ['C3', 'G3', 'B3', 'D4', 'E4'], ['E2', 'B2', 'G3', 'D4', 'F#4']],
@@ -52,7 +49,7 @@ def pad_note(f, dur, rng):
     env = np.clip(t / attack, 0, 1) * np.clip((dur - t) / release, 0, 1)
     env = env ** 1.5
     sig = np.zeros_like(t)
-    for detune in (-0.12, 0.0, 0.12):                       # three slightly detuned voices: a soft chorus
+    for detune in (-0.12, 0.0, 0.12):
         ph = rng.uniform(0, 2 * np.pi)
         sig += np.sin(2 * np.pi * f * 2 ** (detune / 12) * t + ph)
         sig += 0.18 * np.sin(2 * np.pi * 2 * f * 2 ** (detune / 12) * t + ph)
@@ -88,7 +85,6 @@ def render(cfg):
         t0 = int(rng.uniform(0, L) * SR)
         place(bells, rng.uniform(0.25, 0.5) * bell(hz(rng.choice(cfg['bells'])), cfg['bell_decay']), t0)
     dry = pads * 0.55 + bass * 0.45 + bells * 0.35
-    # Reverb: circular convolution with a decaying noise tail, so it wraps round the loop too.
     t = np.arange(int(3.5 * SR)) / SR
     ir = rng.standard_normal(len(t)) * np.exp(-t / 0.9)
     ir = np.pad(ir, (0, n - len(ir)))
@@ -104,7 +100,6 @@ for name, cfg in WORLDS.items():
         with wave.open(str(wav), 'wb') as w:
             w.setnchannels(1); w.setsampwidth(2); w.setframerate(SR)
             w.writeframes((audio * 32767).astype('<i2').tobytes())
-        # Loudness -26 LUFS: the page plays it a further 10 dB down, about 16 dB under the voices.
         subprocess.run(['ffmpeg', '-v', 'error', '-y', '-i', str(wav), '-filter:a', 'loudnorm=I=-26:TP=-3:LRA=11:linear=true', '-ar', str(SR),
                         '-c:a', 'libmp3lame', '-b:a', '80k', '-ac', '1', str(OUT / f'music-{name}.mp3')], check=True)
     print(f'music-{name}.mp3  {L} s loop')

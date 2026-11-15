@@ -1,11 +1,9 @@
 #!/usr/bin/env bash
-# Downloads Earth-to-spacecraft distance tables from NASA JPL Horizons and writes data/*_ephemeris.json.
-# Usage: tools/fetch-ephemeris.sh [START] [STOP]     (dates as YYYY-MM-DD)
 set -euo pipefail
 cd "$(dirname "$0")/.."
 START="${1:-2026-11-01}"; STOP="${2:-2029-01-01}"
 
-fetch() { # horizons_id  output_name  label
+fetch() {
   curl -sfG 'https://ssd.jpl.nasa.gov/api/horizons.api' \
     --data-urlencode "format=text" --data-urlencode "COMMAND='$1'" \
     --data-urlencode "OBJ_DATA=NO" --data-urlencode "MAKE_EPHEM=YES" \
