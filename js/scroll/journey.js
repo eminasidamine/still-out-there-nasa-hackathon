@@ -36,7 +36,7 @@ const glowSprite = (tex, size, opacity = 1) => {
 export function createJourney(under, { onWorld } = {}) {
   let renderer;
   try { renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: 'high-performance' }); }
-  catch { return { set() {}, destroy() {} }; }
+  catch { return { ready: Promise.resolve(), set() {}, destroy() {} }; }
   renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 1.5));
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
@@ -70,14 +70,23 @@ export function createJourney(under, { onWorld } = {}) {
   light.position.set(-30, 12, 22);
   scene.add(light);
 
+  // small (2K) maps: the worlds are small here, and the first screen should appear fast
+  let toLoad = 0, ready;
+  const whenReady = new Promise((r) => { ready = r; });
   const loader = new THREE.TextureLoader();
-  const tex = (src) => { const x = loader.load(src); x.colorSpace = THREE.SRGBColorSpace; return x; };
+  const got = () => { if (--toLoad <= 0) ready(); };
+  const tex = (src, srgb = true) => {
+    toLoad++;
+    const x = loader.load(src.replace('assets/maps/', 'assets/maps/2k/'), got, undefined, got);
+    if (srgb) x.colorSpace = THREE.SRGBColorSpace;
+    return x;
+  };
 
   // the Earth, with its clouds
   const earth = new THREE.Mesh(new THREE.SphereGeometry(EARTH_R, 64, 48), new THREE.MeshStandardMaterial({ map: tex('assets/maps/earth.jpg'), roughness: 0.85 }));
   earth.rotation.z = 23.4 * RAD;
   const clouds = new THREE.Mesh(new THREE.SphereGeometry(EARTH_R * 1.012, 64, 48),
-    new THREE.MeshStandardMaterial({ alphaMap: loader.load('assets/maps/earth-clouds.jpg'), transparent: true, depthWrite: false, color: 0xffffff, roughness: 1 }));
+    new THREE.MeshStandardMaterial({ alphaMap: tex('assets/maps/earth-clouds.jpg', false), transparent: true, depthWrite: false, color: 0xffffff, roughness: 1 }));
   earth.add(clouds);
   const earthAtmo = new THREE.Mesh(new THREE.SphereGeometry(EARTH_R * 1.025, 64, 48),
     new THREE.MeshBasicMaterial({ color: 0x6fb4ff, transparent: true, opacity: 0.12, side: THREE.BackSide, blending: THREE.AdditiveBlending, depthWrite: false }));
@@ -243,6 +252,8 @@ export function createJourney(under, { onWorld } = {}) {
   raf = requestAnimationFrame(frame);
 
   return {
+    /** Resolves when the planet maps have arrived. */
+    ready: whenReady,
     /** 0 = hidden, 1 = fully shown. Stops drawing while hidden. */
     set(o) {
       el.style.opacity = o;

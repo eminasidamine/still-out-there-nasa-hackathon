@@ -210,3 +210,13 @@ body.over-machine { cursor: pointer; }
   .start-actions { flex-direction: column; align-items: stretch; }
   .start-actions > * { width: 100%; justify-content: center; }
 }
+
+/* the Moon and Mars can be turned with a sideways drag at their stop */
+body.is-turning, body.is-turning * { cursor: grabbing !important; user-select: none; }
+html { touch-action: pan-y; }
+.turn-hint { position: fixed; z-index: 12; left: 50%; bottom: calc(env(safe-area-inset-bottom, 0px) + 28px); transform: translateX(-50%); margin: 0; padding: 8px 16px; border: 1px solid rgba(255, 255, 255, .2); border-radius: 999px;
+  background: rgba(0, 0, 0, .55); backdrop-filter: blur(8px); color: var(--ink); font-size: .875rem; pointer-events: none; opacity: 0; transition: opacity .4s; white-space: nowrap; }
+.turn-hint.is-on { opacity: 1; }
+body.is-turning .turn-hint { opacity: 0; }
+@media (min-width: 761px) { .turn-hint { left: auto; right: calc(var(--pad) + 60px); transform: none; } }
+@media (max-width: 760px) { .turn-hint { bottom: auto; top: calc(env(safe-area-inset-top, 0px) + 128px); } }

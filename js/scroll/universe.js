@@ -106,18 +106,30 @@ export function createUniverse(host, { onPick } = {}) {
   // Phones and small windows get 2K maps (a quarter of the pixels); big screens get 4K.
   const small = Math.min(screen.width, screen.height) < 800 || (navigator.deviceMemory && navigator.deviceMemory <= 4);
   const pending = new Map();            // file name → promise, for the loading screen
+  // Fast first, sharp later: every map arrives first as its 2K copy (a quarter of the bytes), so the worlds show
+  // quickly; on big screens the 4K copy replaces it a moment later, once the first screen is up.
+  const read = (src, cb, fail) => {
+    if (bitmaps) bitmaps.load(src, (img) => cb(img, false), undefined, fail);
+    else tex.load(src, (img) => cb(img.image ?? img, true), undefined, fail);
+  };
+  const sharpQueue = [];
+  let sharpTimer = 0;
+  const sharpen = () => {                                   // one 4K map at a time, after the page has settled
+    clearTimeout(sharpTimer);
+    sharpTimer = setTimeout(function next() {
+      const job = sharpQueue.shift();
+      if (!job) return;
+      read(job.src, (img, flip) => { job.t.image = img; job.t.flipY = flip; job.t.needsUpdate = true; dirty = true; sharpTimer = setTimeout(next, 300); }, () => { sharpTimer = setTimeout(next, 300); });
+    }, 2500);
+  };
   const load = (url, srgb = true) => {
-    const src = small ? url.replace('assets/maps/', 'assets/maps/2k/') : url;
+    const lo = url.replace('assets/maps/', 'assets/maps/2k/');
     let ok; const p = new Promise((r) => { ok = r; }); pending.set(url.split('/').pop().replace('.jpg', ''), p);
     const t = new THREE.Texture();
     if (srgb) t.colorSpace = THREE.SRGBColorSpace;
     t.anisotropy = 4;
-    // decode off the main thread where the browser can (no stutter while a 4K map arrives)
-    if (bitmaps) {
-      bitmaps.load(src, (img) => { t.image = img; t.flipY = false; t.needsUpdate = true; dirty = true; ok(); }, undefined, () => ok());
-    } else {
-      tex.load(src, (img) => { t.image = img.image ?? img; t.needsUpdate = true; dirty = true; ok(); }, undefined, () => ok());
-    }
+    read(lo, (img, flip) => { t.image = img; t.flipY = flip; t.needsUpdate = true; dirty = true; ok(); }, () => ok());
+    if (!small) { sharpQueue.push({ src: url, t }); sharpen(); }
     return t;
   };
 
@@ -785,6 +797,13 @@ export function createUniverse(host, { onPick } = {}) {
         scene.fog.density = dust.v * 3.2;
         dirty = true;
       } });
+    },
+    /** Turn the Moon or Mars about its own axis by `angle` radians (drag to turn; 0 puts it back). */
+    turn(id, angle) {
+      const w = world[id];
+      if (!w || w.group.rotation.y === angle) return;
+      w.group.rotation.y = angle;
+      dirty = true;
     },
     /** A slow camera drift (on arrival at a machine, or the finale). Stops as soon as you drag. */
     orbit(on, speed = 0.25) {

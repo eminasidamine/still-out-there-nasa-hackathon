@@ -581,12 +581,51 @@ function buildChrome() {
   });
 }
 
+// ---- drag to turn the Moon or Mars (at their own stop) -----------------------------------------
+// Sideways drags turn the world about its axis, with a little glide after you let go. Anywhere else on the trip
+// it eases back to where it was, so every camera shot of the machines still lines up.
+const TURN = { moon: 0, mars: 0 };
+let turnAt = null, turnVel = 0, turnedAt = -1e9;
+function turnable() { const { seg } = at(smooth); return seg.id === 'moon' || seg.id === 'mars' ? seg.id : null; }
+function turning() {
+  let drag = null;
+  addEventListener('pointerdown', (e) => {
+    const id = turnable();
+    if (!id || layerOpen() || e.button > 0 || e.target.closest(OFF)) return;
+    drag = { x: e.clientX, id, moved: false }; turnVel = 0;
+    document.body.classList.add('is-turning');
+  });
+  addEventListener('pointermove', (e) => {
+    if (!drag) return;
+    const dx = e.clientX - drag.x;
+    if (Math.abs(dx) > 2) { drag.moved = true; turnedAt = performance.now(); }
+    drag.x = e.clientX;
+    const d = (document.dir === 'rtl' ? -1 : 1) * dx * 0.006;
+    TURN[drag.id] += d; turnVel = d;
+    U.turn(drag.id, TURN[drag.id]);
+  });
+  const up = () => { if (!drag) return; turnAt = drag.id; drag = null; document.body.classList.remove('is-turning'); };
+  addEventListener('pointerup', up); addEventListener('pointercancel', up);
+  const hint = h('p', { class: 'turn-hint', 'aria-hidden': 'true' }, h('span', { 'aria-hidden': 'true' }, '⟲'), ' ', t('scroll.dragTurn'));
+  document.body.append(hint);
+  (function glide() {
+    requestAnimationFrame(glide);
+    const here = turnable();
+    hint.classList.toggle('is-on', !!here && !layerOpen());
+    for (const id of ['moon', 'mars']) {
+      if (drag?.id === id) continue;
+      if (id === here && turnAt === id && Math.abs(turnVel) > 0.0002) { TURN[id] += turnVel; turnVel *= 0.94; U.turn(id, TURN[id]); }
+      else if (id !== here && TURN[id] !== 0) { TURN[id] = Math.abs(TURN[id]) < 0.002 ? 0 : TURN[id] * 0.85; U.turn(id, TURN[id]); }
+    }
+  })();
+}
+
 // ---- tap a machine to see its real photo ------------------------------------------------------
 const OFF = 'a, button, input, .card-host, header, .rail, #layer, .label, .caption';
 function picking() {
   const hint = $('pick-hint');
   addEventListener('click', (e) => {
-    if (layerOpen() || e.target.closest(OFF)) return;
+    if (layerOpen() || e.target.closest(OFF) || performance.now() - turnedAt < 400) return;   // a drag to turn is not a tap
     const id = U.pick(e.clientX, e.clientY), a = id && artifact(id);
     if (a && imageOf(a)) { hint.hidden = true; showPhoto(a, { x: e.clientX, y: e.clientY }); }
   });
@@ -626,10 +665,10 @@ async function start() {
   J = createJourney($('space'), { onWorld: (id) => goTo(id) });
   for (const id of MACHINES) U.addMachine(artifact(id), imageOf(artifact(id))?.src);
   ctx = { U, photo: showPhoto };
-  U.ready('eagle'); U.ready('opportunity');
   U.pause(true);
   $('boot').querySelector('.boot-text').textContent = t('boot.loading');
-  await Promise.race([Promise.all([U.loaded(['stars', 'earth', 'moon']), U.ready('eagle')]), new Promise((r) => setTimeout(r, 4000))]);
+  // the first screen only needs the small Earth–Moon–Mars scene: wait for its maps, not for the big scene's
+  await Promise.race([J.ready, new Promise((r) => setTimeout(r, 2500))]);
 
   buildChrome();
   // sound was on last time: browsers still need one tap or key press before it can play
@@ -646,8 +685,12 @@ async function start() {
   requestAnimationFrame(loop);
 
   U.prewarm();
-  for (const id of ['opportunity', 'ingenuity', 'kepler', 'pioneer10']) { asked.add(id); U.ready(id).then(() => U.prewarm()); }
-  U.loaded(['mars']).then(() => U.prewarm());
+  // the 3D models are big: fetch them once the first screen is up, not before
+  setTimeout(() => {
+    for (const id of ['eagle', 'opportunity', 'ingenuity', 'kepler', 'pioneer10']) { asked.add(id); U.ready(id).then(() => U.prewarm()); }
+    U.loaded(['mars']).then(() => U.prewarm());
+  }, 3000);
+  turning();
   U.pause(false); U.warm();
   document.body.classList.add('is-ready');
   const boot = $('boot');

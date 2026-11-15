@@ -1,0 +1,6 @@
+# Cloudflare: keep the heavy files (maps, 3D models, sounds, libraries) in the browser for a week,
+# so a second visit does not download them again. Pages, scripts and data stay fresh.
+/assets/*
+  Cache-Control: public, max-age=604800
+/vendor/*
+  Cache-Control: public, max-age=604800
