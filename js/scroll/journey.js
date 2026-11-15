@@ -30,10 +30,7 @@ export function createJourney(under, { onWorld } = {}) {
     S('stop', { offset: '0%', 'stop-color': '#ffffff' }), S('stop', { offset: '35%', 'stop-color': '#9fd2ff' }),
     S('stop', { offset: '100%', 'stop-color': '#2f7bff', 'stop-opacity': 0 })));
   const marsRoute = S('path', { class: 'route route-mars' }), moonRoute = S('path', { class: 'route route-moon' });
-  const ships = [
-    { route: marsRoute, period: 11000, offset: 0, g: shuttle(1) },
-    { route: moonRoute, period: 6000, offset: 0.45, g: shuttle(0.7) },
-  ];
+  const ships = [];                                  // no shuttles on the routes (removed on request)
   const svg = S('svg', { class: 'journey-routes', 'aria-hidden': 'true' }, defs, marsRoute, moonRoute, ...ships.map((s) => s.g));
 
   const world = (id, link, opts) => {

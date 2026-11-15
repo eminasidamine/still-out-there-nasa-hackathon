@@ -1,7 +1,7 @@
 # Credits
 
 ## Imagery and 3D
-- **Start screen globes:** drawn in the browser from the Earth, clouds, Moon and Mars maps above (2K copies), turning. The space shuttles there are drawn in code.
+- **Start screen globes:** drawn in the browser from the Earth, clouds, Moon and Mars maps above (2K copies), turning.
 - **Entrance pictures** (`assets/img/intro/`: a space shuttle rising through the stars, an astronaut, a deep-space probe, the Earth with a station): supplied by the project team, cropped and compressed. Their original sources and licences should be checked before the site is shared more widely.
 - **Moon surface map:** NASA's Scientific Visualization Studio, CGI Moon Kit (LRO color mosaic, 4K). https://svs.gsfc.nasa.gov/4720
 - **Mars, Earth, Earth clouds and Milky Way maps:** Solar System Scope textures (based on NASA elevation and imagery data), CC BY 4.0. https://www.solarsystemscope.com/textures/ (resized to 4K/2K)
