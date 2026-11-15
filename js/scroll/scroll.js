@@ -7,6 +7,7 @@ import { h } from '../v1/dom.js';
 import { t, loadLanguage, preferredLanguage, chooseLanguage, LANGUAGES, lang, fmtNumber, fmtDate } from '../i18n.js';
 import { loadData, artifact } from '../data.js';
 import { createUniverse } from './universe.js';
+import { createJourney } from './journey.js';
 import { MACHINES, buildStop, tickStop, stopName } from '../stops.js';
 import { imageOf } from '../story.js';
 import { rollCall } from '../rollcall.js';
@@ -69,7 +70,7 @@ const HOLDS = SEG.filter((s) => s.kind === 'hold').map((s) => s.id);
 const RAIL = SEG.filter((s) => s.kind === 'hold' && s.rail !== false).map((s) => s.id);
 const IDX = Object.fromEntries(SEG.map((s, i) => [s.id, i]));
 
-let U, poses = {}, ctx, roll = null;
+let U, J, poses = {}, ctx, roll = null;
 
 // ---- camera ---------------------------------------------------------------------------------
 const V = (p) => p.clone();
@@ -258,7 +259,7 @@ function view(card) {
   let v;
   if (own) v = { el: own(), wide: card === 'start', center: card === 'lastCall' };
   else { const s = buildStop(card, ctx); v = { el: s.el, labels: s.labels, leave: s.leave, side: !!s.side }; }
-  if (card === 'start') v.labels = [{ text: t('body.moon'), kind: 'world', get: () => U.bodyPos('moon') }];
+  if (card === 'start') v.labels = [];                     // the start screen names its worlds itself (journey.js)
   views.set(card, v);
   return v;
 }
@@ -395,6 +396,8 @@ function paint(y) {
     U.pulse(pose.ahead(u), band(u, 0.03, 0.12) * (1 - band(u, 0.82, 0.95)));
   } else { U.streaks(0, 0); U.pulse(null); }
   U.frame(seg.frame ?? (seg.card === 'finale' ? 'right' : seg.card === 'start' ? 'none' : 'left'));
+  // the Earth–Moon–Mars start screen fades out as the page starts toward the Moon
+  J?.set(i === 0 ? 1 - band(u, 0.55, 0.95) : 0);
 
   // Eagle's top half: on the lander until lift-off, gone after
   const iL = IDX.liftoff;
@@ -586,6 +589,7 @@ async function start() {
   await loadLanguage(preferredLanguage());
   await loadData();
   U = createUniverse($('space'), { onPick: (id) => goTo(id) });
+  J = createJourney($('space'), { onWorld: (id) => goTo(id) });
   for (const id of MACHINES) U.addMachine(artifact(id), imageOf(artifact(id))?.src);
   ctx = { U, photo: showPhoto };
   U.ready('eagle'); U.ready('opportunity');

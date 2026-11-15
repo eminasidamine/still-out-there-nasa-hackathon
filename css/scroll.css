@@ -127,3 +127,11 @@ html:has(body.layer-open) { overflow: hidden; }
 body.over-machine { cursor: pointer; }
 .pick-hint { position: fixed; z-index: 30; left: 0; top: 0; margin: 0; padding: 4px 10px; border-radius: 999px; pointer-events: none;
   background: rgba(0, 0, 0, .7); border: 1px solid var(--line); font-size: .75rem; color: var(--ink); white-space: nowrap; }
+
+/* Start screen: the Earth, the Moon and Mars (js/scroll/journey.js), over the big scene, under the cards */
+.journey { position: fixed; inset: 0; pointer-events: none; transition: opacity .2s linear; }
+.journey-canvas { position: absolute; inset: 0; width: 100% !important; height: 100% !important; display: block; }
+.journey-labels { position: absolute; inset: 0; overflow: hidden; }
+.journey-label { position: absolute; left: 0; top: 0; white-space: nowrap; font: 500 .72rem/1 var(--mono, ui-monospace, monospace); letter-spacing: .14em; text-transform: uppercase; color: rgba(242, 239, 232, .7); text-shadow: 0 0 8px #000; }
+.journey-label.is-link { pointer-events: auto; cursor: pointer; background: none; border: 1px solid rgba(242, 239, 232, .28); border-radius: 999px; padding: .5em .9em; color: #f2efe8; font-weight: 600; }
+.journey-label.is-link:hover, .journey-label.is-link:focus-visible { border-color: #ff6a33; color: #fff; }
