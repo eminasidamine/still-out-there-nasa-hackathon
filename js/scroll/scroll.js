@@ -674,8 +674,19 @@ async function start() {
   ctx = { U, photo: showPhoto };
   U.pause(true);
   $('boot').querySelector('.boot-text').textContent = t('boot.loading');
-  // the first screen only needs the small Earth–Moon–Mars scene: wait for its maps, not for the big scene's
-  await Promise.race([J.ready, new Promise((r) => setTimeout(r, 2500))]);
+  // Load enough before showing anything, so the page is smooth afterwards: the start screen's globes, the big
+  // scene's maps and the first 3D model. At least 2.5 s, at most 15 s; the line shows real progress.
+  {
+    const jobs = [J.ready, U.loaded(['stars', 'earth', 'moon', 'mars']), U.ready('eagle'), U.ready('opportunity')];
+    const bar = $('boot').querySelector('.boot-line i');
+    let done = 0;
+    bar.classList.add('is-progress');
+    const step = () => { done++; bar.style.width = `${Math.round((done / jobs.length) * 100)}%`; };
+    jobs.forEach((p) => Promise.resolve(p).then(step, step));
+    const minWait = new Promise((r) => setTimeout(r, 2500));
+    await Promise.race([Promise.all([Promise.allSettled(jobs), minWait]), new Promise((r) => setTimeout(r, 15000))]);
+    bar.style.width = '100%';
+  }
 
   buildChrome();
   // sound was on last time: browsers still need one tap or key press before it can play
